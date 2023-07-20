@@ -1,29 +1,39 @@
 class Player:
-    def __init__(self, colour, name):
+    def __init__(self, colour, name, player_num):
         #Initialise each Player
         self.colour = colour
         self.name = name
+        self.player_num = player_num
         self.is_turn = False
         self.in_check = False
         self.opponent_checkmated = False
         self.valid_moves = True
+        self.game_over = False
+        self.colour_dict = valid_dict[colour + "_pieces"]
     
     def __repr__(self):
         #Win Conditions
         if self.in_check:
-            return f"Player {self.name}'s King is in check"
-        
-        if self.opponent_checkmated:
+            return f"{self.name}'s King is in check \n {self.name}'s turn"
+        elif self.opponent_checkmated:
             self.game_over = True
-            return f"Checkmate! Player {self.name} wins!"
-        
-        if self.valid_moves == False and self.in_check == False:
+            return f"Checkmate! {self.name} wins!"
+        elif self.valid_moves == False and self.in_check == False:
             self.game_over = True
-            return f"Draw! Player {self.name} has no valid moves to take."
+            return f"Draw! {self.name} has no valid moves to take."
+        elif self.game_over == False:
+            return f"{self.name}'s turn"
         
-        if self.game_over == False:
-            return f"Player {self.name}'s turn"
-        
+    def choose_move(self, piece, location):
+        try:
+            if piece.lower() in self.colour_dict:
+                pass
+            elif location.upper() in board.self.grid:
+                pass
+        except IndexError:
+            print("Invalid piece. Please try again.")
+            player_names[self.player_num].choose_move(input(f"{self.name}, choose a piece: "), input("Now choose a location: "))
+    
 
 class Board:
     #Define board layout
@@ -41,42 +51,42 @@ class Board:
     
     #Create the board
     def create_board(self):
-        for i in range(self.size):
+        for i in range(self.size, 0, -1):
+            global valid_dict
             self.line = []
             self.dict = {}
-            for j in range(1, self.size + 1):
-                if self.chars[i].upper() == "B" or self.chars[i].upper() == "G":
-                    if self.chars[i].upper() == "B":
-                        self.dict[self.chars[i].upper() + str(j)] = black_pieces["pawn"]
-                    elif self.chars[i].upper() == "G":
-                        self.dict[self.chars[i].upper() + str(j)] = white_pieces["pawn"]
-                elif (j == 1 or j == 8) and (self.chars[i].upper() == "A" or self.chars[i].upper() == "H"):
-                    if self.chars[i].upper() == "A":
-                        self.dict[self.chars[i].upper() + str(j)] = black_pieces["rook"]
-                    elif self.chars[i].upper() == "H":
-                        self.dict[self.chars[i].upper() + str(j)] = white_pieces["rook"]
-                elif (j == 2 or j == 7) and (self.chars[i].upper() == "A" or self.chars[i].upper() == "H"):
-                    if self.chars[i].upper() == "A":
-                        self.dict[self.chars[i].upper() + str(j)] = black_pieces["knight"]
-                    elif self.chars[i].upper() == "H":
-                        self.dict[self.chars[i].upper() + str(j)] = white_pieces["knight"]
-                elif (j == 3 or j == 6) and (self.chars[i].upper() == "A" or self.chars[i].upper() == "H"):
-                    if self.chars[i].upper() == "A":
-                        self.dict[self.chars[i].upper() + str(j)] = black_pieces["bishop"]
-                    elif self.chars[i].upper() == "H":
-                        self.dict[self.chars[i].upper() + str(j)] = white_pieces["bishop"]
-                elif j == 4 and (self.chars[i].upper() == "A" or self.chars[i].upper() == "H"):
-                    if self.chars[i].upper() == "A":
-                        self.dict[self.chars[i].upper() + str(j)] = black_pieces["queen"]
-                    elif self.chars[i].upper() == "H":
-                        self.dict[self.chars[i].upper() + str(j)] = white_pieces["queen"]
-                elif j == 5 and (self.chars[i].upper() == "A" or self.chars[i].upper() == "H"):
-                    if self.chars[i].upper() == "A":
-                        self.dict[self.chars[i].upper() + str(j)] = black_pieces["king"]
-                    elif self.chars[i].upper() == "H":
-                        self.dict[self.chars[i].upper() + str(j)] = white_pieces["king"]
+            for j in self.chars:
+                #Layout pieces other than pawns
+                if i == 8:
+                    if j == "a" or j == "h":
+                        self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["rook"]
+                    elif j == "b" or j == "g":
+                        self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["knight"]
+                    elif j == "c" or j == "f":
+                        self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["bishop"]
+                    elif j == "d":
+                        self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["queen"]
+                    elif j == "e":
+                        self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["king"]
+                elif i == 1:
+                    if j == "a" or j == "h":
+                        self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["rook"]
+                    elif j == "b" or j == "g":
+                        self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["knight"]
+                    elif j == "c" or j == "f":
+                        self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["bishop"]
+                    elif j == "d":
+                        self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["queen"]
+                    elif j == "e":
+                        self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["king"]
+                #Layout pawns
+                elif i == 7:
+                    self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["pawn"]
+                elif i == 2:
+                    self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["pawn"]
+                #Layout blanks
                 else:
-                    self.dict[self.chars[i].upper() + str(j)] = "   0"
+                    self.dict[j.upper() + str(i)] = "   0"
                 
             self.line.append(self.dict)
             self.grid.append(self.line)
@@ -95,9 +105,9 @@ class Piece:
     def taken(self):
         if self.taken == True:
             if self.colour == black:
-                del black_pieces[self.piece_name]
+                del valid_dict.black_pieces[self.piece_name]
             elif self.colour == white:
-                del white_pieces[self.piece_name]
+                del valid_dict.white_pieces[self.piece_name]
 
 
 #Each piece
@@ -155,34 +165,68 @@ black = "b-"
 white = "w-"
 game_state = False
 
-black_pieces = {
-    "pawn": Pawn(black, "pawn").short_name,
-    "rook": Rook(black, "rook").short_name,
-    "bishop": Bishop(black, "bishop").short_name,
-    "knight": Knight(black, "knight").short_name,
-    "queen": Queen(black, "queen").short_name,
-    "king": King(black, "king").short_name,
-}
+valid_dict = {
+    "black_pieces" : {
+        "pawn": Pawn(black, "pawn").short_name,
+        "rook": Rook(black, "rook").short_name,
+        "bishop": Bishop(black, "bishop").short_name,
+        "knight": Knight(black, "knight").short_name,
+        "queen": Queen(black, "queen").short_name,
+        "king": King(black, "king").short_name,
+    },
 
-white_pieces = {
-    "pawn": Pawn(white, "pawn").short_name,
-    "rook": Rook(white, "rook").short_name,
-    "bishop": Bishop(white, "bishop").short_name,
-    "knight": Knight(white, "knight").short_name,
-    "queen": Queen(white, "queen").short_name,
-    "king": King(white, "king").short_name,
+    "white_pieces" : {
+        "pawn": Pawn(white, "pawn").short_name,
+        "rook": Rook(white, "rook").short_name,
+        "bishop": Bishop(white, "bishop").short_name,
+        "knight": Knight(white, "knight").short_name,
+        "queen": Queen(white, "queen").short_name,
+        "king": King(white, "king").short_name,
+    }
 }
 
 #Main game loop
 def game_loop():
-    while Player().valid_moves or Player().opponent_checkmated:
-        for line in board.grid:
-            print(*line)
-        return ""
+    game_state = True
+    #Player 1's move is 0, Player 2's move is 1
+    current_move = 0
+    #Print initial board
+    for line in board.grid:
+        print(*line)
+        
+    #Keep game running, and check if someone has won/lost
+    while game_state:
+        #Keep track of the current move
+        player_names[current_move].__repr__()
+        player_names[current_move].choose_move(input(f"{player_names[current_move].name}, choose a piece: "), input("Now choose a location: "))
+        if current_move == 0:
+            player_names[current_move]
+            
+            #Change turn
+            current_move = 1
+        elif current_move == 1:
+            
+            
+            #Change turn
+            current_move = 0
+            
+        #Move piece, and check if it is valid
+        
+        
+        #Check if someone has won/lost
+        if player1.game_over == True:
+            game_state = False
+        elif player2.game_over == True:
+            game_state = False
+        
+    return ""
+
 
 #Set game variables
 board = Board()
-
+player1 = Player("black", input("Player 1 (Black), choose your name: "), 0)
+player2 = Player("white", input("Player 2 (White), choose your name: "), 1)
+player_names = [player1, player2]
 
 board.create_board()
 
