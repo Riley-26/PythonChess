@@ -24,15 +24,22 @@ class Player:
         elif self.game_over == False:
             return f"{self.name}'s turn"
         
-    def choose_move(self, piece, location):
+    def choose_move(self, old_location, new_location):
+        chosen_location = []
+        old_location = old_location.upper()
+        new_location = new_location.upper()
         try:
-            if piece.lower() in self.colour_dict:
-                pass
-            elif location.upper() in board.self.grid:
-                pass
-        except IndexError:
-            print("Invalid piece. Please try again.")
-            player_names[self.player_num].choose_move(input(f"{self.name}, choose a piece: "), input("Now choose a location: "))
+            if old_location in board_dict:
+                board_dict[new_location] = board_dict[old_location]
+                #Check if piece is in way
+                print(board_dict)
+            else:
+                raise KeyError
+        except KeyError:
+            print("Invalid move, please try again.")
+            print(self.choose_move(input(f"{self.name}, choose the current location of your piece: "), input("Now choose a new location for the piece: ")))
+        
+        return chosen_location
     
 
 class Board:
@@ -51,8 +58,11 @@ class Board:
     
     #Create the board
     def create_board(self):
+        black_pawn_num = 0
+        white_pawn_num = 0
         for i in range(self.size, 0, -1):
-            global valid_dict
+            global valid_dictw
+            global board_dict
             self.line = []
             self.dict = {}
             for j in self.chars:
@@ -81,12 +91,16 @@ class Board:
                         self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["king"]
                 #Layout pawns
                 elif i == 7:
-                    self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["pawn"]
+                    self.dict[j.upper() + str(i)] = valid_dict["black_pieces"]["pawn"][black_pawn_num]
+                    black_pawn_num += 1
                 elif i == 2:
-                    self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["pawn"]
+                    self.dict[j.upper() + str(i)] = valid_dict["white_pieces"]["pawn"][white_pawn_num]
+                    white_pawn_num += 1
                 #Layout blanks
                 else:
                     self.dict[j.upper() + str(i)] = "   0"
+                
+                board_dict.update(self.dict)
                 
             self.line.append(self.dict)
             self.grid.append(self.line)
@@ -112,9 +126,9 @@ class Piece:
 
 #Each piece
 class Pawn(Piece):
-    def __init__(self, colour, piece_name):
+    def __init__(self, colour, piece_name, pawn_num):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "Pn"
+        self.short_name = colour + "P" + str(pawn_num)
 
     def valid_move(self):
         pass
@@ -167,7 +181,7 @@ game_state = False
 
 valid_dict = {
     "black_pieces" : {
-        "pawn": Pawn(black, "pawn").short_name,
+        "pawn": [Pawn(black, "pawn", i).short_name for i in range(1, 9)],
         "rook": Rook(black, "rook").short_name,
         "bishop": Bishop(black, "bishop").short_name,
         "knight": Knight(black, "knight").short_name,
@@ -176,7 +190,7 @@ valid_dict = {
     },
 
     "white_pieces" : {
-        "pawn": Pawn(white, "pawn").short_name,
+        "pawn": [Pawn(white, "pawn", i).short_name for i in range(1, 9)],
         "rook": Rook(white, "rook").short_name,
         "bishop": Bishop(white, "bishop").short_name,
         "knight": Knight(white, "knight").short_name,
@@ -198,7 +212,7 @@ def game_loop():
     while game_state:
         #Keep track of the current move
         player_names[current_move].__repr__()
-        player_names[current_move].choose_move(input(f"{player_names[current_move].name}, choose a piece: "), input("Now choose a location: "))
+        player_names[current_move].choose_move(input(f"{player_names[current_move].name}, choose the current location of your piece: "), input("Now choose a new location for the piece: "))
         if current_move == 0:
             player_names[current_move]
             
@@ -227,6 +241,7 @@ board = Board()
 player1 = Player("black", input("Player 1 (Black), choose your name: "), 0)
 player2 = Player("white", input("Player 2 (White), choose your name: "), 1)
 player_names = [player1, player2]
+board_dict = {}
 
 board.create_board()
 
