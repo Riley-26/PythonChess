@@ -25,21 +25,25 @@ class Player:
             return f"{self.name}'s turn"
         
     def choose_move(self, old_location, new_location):
-        chosen_location = []
         old_location = old_location.upper()
         new_location = new_location.upper()
+        chosen_piece = board_dict[old_location]
         try:
             if old_location in board_dict:
-                board_dict[new_location] = board_dict[old_location]
                 #Check if piece is in way
-                print(board_dict)
+                if chosen_piece.valid_move(old_location, new_location):
+                    board.update_board(old_location, new_location)
+                    for line in board.grid:
+                        print(*line)
+                else:
+                    raise KeyError
             else:
                 raise KeyError
         except KeyError:
             print("Invalid move, please try again.")
             print(self.choose_move(input(f"{self.name}, choose the current location of your piece: "), input("Now choose a new location for the piece: ")))
         
-        return chosen_location
+        return ""
     
 
 class Board:
@@ -50,22 +54,18 @@ class Board:
         self.grid = []
         self.line = []
         self.dict = {}
-        self.chars = [chr(i) for i in range(ord("a"), ord("h")+1)]
-    
-    #Update board after each move
-    def update_board(self):
-        pass
+        self.chars = chars
     
     #Create the board
     def create_board(self):
         black_pawn_num = 0
         white_pawn_num = 0
         for i in range(self.size, 0, -1):
-            global valid_dictw
+            global valid_dict
             global board_dict
             self.line = []
-            self.dict = {}
             for j in self.chars:
+                self.dict = {}
                 #Layout pieces other than pawns
                 if i == 8:
                     if j == "a" or j == "h":
@@ -100,11 +100,38 @@ class Board:
                 else:
                     self.dict[j.upper() + str(i)] = "   0"
                 
+                #self.grid stores key-value pairs of the location and the short-name of the object, which will be displayed to the user
+                if self.dict.get(j.upper() + str(i)) != "   0":
+                    self.line.append("[" + j.upper() + str(i) + ": " + self.dict.get(j.upper() + str(i)).short_name + "]")
+                else:
+                    self.line.append("[" + j.upper() + str(i) + ": " + self.dict.get(j.upper() + str(i)) + "]")
+                #Board dictionary stores key-value pairs of the location and object
                 board_dict.update(self.dict)
-                
-            self.line.append(self.dict)
+            
             self.grid.append(self.line)
         
+        return ""
+    
+    def update_board(self, old_location, new_location):
+        #Update the new location in the board dictionary
+        if board_dict[new_location] == "   0":
+            board_dict[new_location] = board_dict[old_location]
+            board_dict[old_location] = "   0"
+        elif board_dict[new_location].short_name != board_dict[old_location].short_name:
+            board_dict[new_location] = board_dict[old_location]
+            board_dict[old_location] = "   0"
+        
+        #Update the new location in the displayed board
+        for x, item in enumerate(board.grid):
+            for y in range(len(item)):
+                if (8 - int(new_location[1])) == x:
+                    if char_codes[new_location[0].lower()] - 1 == y:
+                        print(x, y)
+                        board.grid[x][y] = "[" + str(new_location) + ": " + str(board_dict[new_location].short_name) + "]"
+                elif (8 - int(old_location[1])) == x:
+                    if char_codes[old_location[0].lower()] - 1 == y:
+                        board.grid[x][y] = "[" + str(old_location) + ": " + "   0" + "]"
+
         return ""
 
     
@@ -130,8 +157,101 @@ class Pawn(Piece):
         super().__init__(colour, piece_name)
         self.short_name = colour + "P" + str(pawn_num)
 
-    def valid_move(self):
-        pass
+    def valid_move(self, old_location, new_location):
+        global char_codes
+        old_location_num = int(old_location[1])
+        new_location_num = int(new_location[1])
+        print(new_location_num, old_location_num)
+        #Define set moves
+        valid = False
+        if self.colour == "b-":
+            #Makes sure the new location is further into the board than old location
+            if new_location_num >= old_location_num:
+                return valid
+            #Check if there is a piece in the way
+            if board_dict.get(new_location) != "   0":
+                valid = False
+            #Check if a piece can be taken
+            if new_location_num == old_location_num - 1:
+                if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1):
+                    if board_dict[new_location].short_name == "w-":
+                        board_dict[new_location].taken = True
+                        board_dict[new_location].taken()
+                        board.update_board(old_location, new_location)
+                        
+                        valid = True
+                        return True
+                    elif board_dict[new_location].short_name == "b-":
+                        valid = False
+                        return valid
+            #Standard move
+            if new_location_num <= 8:
+                #Pawn changes to any piece if it reaches end of board
+                if new_location_num == 8:
+                    valid = True
+                    self.change_piece(input("Choose what you would like the pawn to change to: "))
+                    return valid
+                #Move one place
+                elif new_location_num == old_location_num - 1:
+                    valid = True
+            #Pawn can move two places on first move
+            if old_location_num == 7:
+                if new_location_num == 5:
+                    valid = True
+                elif new_location_num == 6:
+                    valid = True
+                else:
+                    valid = False
+            
+            return valid
+        #Same thing for the white side
+        elif self.colour == "w-":
+            #Makes sure the new location is further into the board than old location
+            if new_location_num <= old_location_num:
+                return valid
+            #Check if there is a piece in the way
+            if board_dict.get(new_location) != "   0":
+                valid = False
+            #Check if a piece can be taken
+            if new_location_num == old_location_num + 1:
+                if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1):
+                    if board_dict[new_location].short_name == "w-":
+                        board_dict[new_location].taken = True
+                        board_dict[new_location].taken()
+                        board.update_board(old_location, new_location)
+                        
+                        valid = True
+                        return True
+                    elif board_dict[new_location].short_name == "b-":
+                        valid = False
+                        return valid
+            #Standard move
+            if new_location_num >= 8:
+                #Pawn changes to any piece if it reaches end of board
+                if new_location_num == 8:
+                    valid = True
+                    self.change_piece(input("Choose what you would like the pawn to change to: "))
+                    return valid
+                #Move one place
+                elif new_location_num == old_location_num + 1:
+                    valid = True
+            #Pawn can move two places on first move
+            if old_location_num == 2:
+                if new_location_num == 4:
+                    valid = True
+                elif new_location_num == 3:
+                    valid = True
+                else:
+                    valid = False
+        
+            return valid
+        
+    def change_piece(self, new_piece, new_location):
+        if new_piece in new_pieces:
+            board_dict[new_location] = new_piece_objects[new_piece]
+            return True
+        else:
+            return False
 
 class Rook(Piece):
     def __init__(self, colour, piece_name):
@@ -139,6 +259,9 @@ class Rook(Piece):
         self.short_name = colour + "Rk"
 
     def valid_move(self):
+        pass
+    
+    def castling(self):
         pass
 
 class Knight(Piece):
@@ -178,26 +301,45 @@ class King(Piece):
 black = "b-"
 white = "w-"
 game_state = False
+black_pawns, white_pawns = [Pawn(black, "pawn", i) for i in range(1, 9)], [Pawn(white, "pawn", i) for i in range(1, 9)]
+black_rook, white_rook = Rook(black, "rook"), Rook(white, "rook")
+black_bishop, white_bishop = Bishop(black, "bishop"), Bishop(white, "bishop")
+black_knight, white_knight = Knight(black, "knight"), Knight(white, "knight")
+black_queen, white_queen = Queen(black, "queen"), Queen(white, "queen")
+black_king, white_king = King(black, "king"), King(white, "king")
 
 valid_dict = {
     "black_pieces" : {
-        "pawn": [Pawn(black, "pawn", i).short_name for i in range(1, 9)],
-        "rook": Rook(black, "rook").short_name,
-        "bishop": Bishop(black, "bishop").short_name,
-        "knight": Knight(black, "knight").short_name,
-        "queen": Queen(black, "queen").short_name,
-        "king": King(black, "king").short_name,
+        "pawn": black_pawns,
+        "rook": black_rook,
+        "bishop": black_bishop,
+        "knight": black_knight,
+        "queen": black_queen,
+        "king": black_king,
     },
 
     "white_pieces" : {
-        "pawn": [Pawn(white, "pawn", i).short_name for i in range(1, 9)],
-        "rook": Rook(white, "rook").short_name,
-        "bishop": Bishop(white, "bishop").short_name,
-        "knight": Knight(white, "knight").short_name,
-        "queen": Queen(white, "queen").short_name,
-        "king": King(white, "king").short_name,
+        "pawn": white_pawns,
+        "rook": white_rook,
+        "bishop": white_bishop,
+        "knight": white_knight,
+        "queen": white_queen,
+        "king": white_king,
     }
 }
+
+new_pieces = ("rook", "knight", "queen", "bishop")
+new_piece_objects = {
+    "rook": Rook,
+    "knight": Knight,
+    "queen": Queen,
+    "bishop": Bishop
+}
+char_codes = {}
+chars = [chr(i) for i in range(ord("a"), ord("h")+1)]
+char_indices = [i for i in range(1, 9)]
+for i in range(len(chars)):
+    char_codes[chars[i]] = char_indices[i]
 
 #Main game loop
 def game_loop():
