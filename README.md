@@ -1,2 +1,2 @@
 # PythonChess
-A game of chess, coded using OOP in vanilla Python.
+A game of chess in the control panel, coded using OOP in vanilla Python.
