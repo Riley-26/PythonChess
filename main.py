@@ -21,7 +21,8 @@ class Player:
         elif self.valid_moves == False and self.in_check == False:
             self.game_over = True
             return f"Draw! {self.name} has no valid moves to take."
-        elif self.game_over == False:
+        
+        if self.game_over == False:
             return f"{self.name}'s turn"
         
     def choose_move(self, old_location, new_location):
@@ -158,19 +159,34 @@ class Pawn(Piece):
         self.short_name = colour + "P" + str(pawn_num)
 
     def valid_move(self, old_location, new_location):
+        #Define set moves
         global char_codes
+        valid = False
+        #Checks if the input is valid
+        if board_dict[old_location].colour == self.colour:
+            if len(new_location) == 2 and len(old_location) == 2:
+                if new_location[0].lower() in chars and old_location[0].lower() in chars:
+                    if int(new_location[1]) in char_indices and int(old_location[1]) in char_indices:
+                        valid = True
+                    else:
+                        return valid
+                else:
+                    return valid
+            else:
+                return valid
+        
         old_location_num = int(old_location[1])
         new_location_num = int(new_location[1])
-        print(new_location_num, old_location_num)
-        #Define set moves
-        valid = False
+        
+        #Check if there is a piece in the way
+        if board_dict.get(new_location) != "   0":
+                valid = False
+        #Checks if it's black
         if self.colour == "b-":
+            print(self.colour)
             #Makes sure the new location is further into the board than old location
             if new_location_num >= old_location_num:
                 return valid
-            #Check if there is a piece in the way
-            if board_dict.get(new_location) != "   0":
-                valid = False
             #Check if a piece can be taken
             if new_location_num == old_location_num - 1:
                 if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1):
@@ -202,16 +218,14 @@ class Pawn(Piece):
                     valid = True
                 else:
                     valid = False
+                    return valid
             
-            return valid
-        #Same thing for the white side
+        #Checks if it's white
         elif self.colour == "w-":
+            print(self.colour)
             #Makes sure the new location is further into the board than old location
             if new_location_num <= old_location_num:
                 return valid
-            #Check if there is a piece in the way
-            if board_dict.get(new_location) != "   0":
-                valid = False
             #Check if a piece can be taken
             if new_location_num == old_location_num + 1:
                 if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1):
@@ -226,9 +240,9 @@ class Pawn(Piece):
                         valid = False
                         return valid
             #Standard move
-            if new_location_num >= 8:
+            if new_location_num >= 1:
                 #Pawn changes to any piece if it reaches end of board
-                if new_location_num == 8:
+                if new_location_num == 1:
                     valid = True
                     self.change_piece(input("Choose what you would like the pawn to change to: "))
                     return valid
@@ -243,9 +257,11 @@ class Pawn(Piece):
                     valid = True
                 else:
                     valid = False
+                    return valid
         
-            return valid
-        
+        return valid
+
+    #Pawn change at end of board
     def change_piece(self, new_piece, new_location):
         if new_piece in new_pieces:
             board_dict[new_location] = new_piece_objects[new_piece]
@@ -343,9 +359,8 @@ for i in range(len(chars)):
 
 #Main game loop
 def game_loop():
+    global current_move
     game_state = True
-    #Player 1's move is 0, Player 2's move is 1
-    current_move = 0
     #Print initial board
     for line in board.grid:
         print(*line)
@@ -356,7 +371,7 @@ def game_loop():
         player_names[current_move].__repr__()
         player_names[current_move].choose_move(input(f"{player_names[current_move].name}, choose the current location of your piece: "), input("Now choose a new location for the piece: "))
         if current_move == 0:
-            player_names[current_move]
+            player_names[current_move].is_turn
             
             #Change turn
             current_move = 1
@@ -380,6 +395,8 @@ def game_loop():
 
 #Set game variables
 board = Board()
+#Current move 
+current_move = 0
 player1 = Player("black", input("Player 1 (Black), choose your name: "), 0)
 player2 = Player("white", input("Player 2 (White), choose your name: "), 1)
 player_names = [player1, player2]
