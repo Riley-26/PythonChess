@@ -28,23 +28,25 @@ class Player:
     def choose_move(self, old_location, new_location):
         old_location = old_location.upper()
         new_location = new_location.upper()
-        chosen_piece = board_dict[old_location]
         try:
-            if old_location in board_dict:
+            if old_location in board_dict and board_dict[old_location] != "   0":
+                chosen_piece = board_dict[old_location]
                 #Check if piece is in way
                 if chosen_piece.valid_move(old_location, new_location):
                     board.update_board(old_location, new_location)
                     for line in board.grid:
                         print(*line)
+                    return "Valid Move"
                 else:
                     raise KeyError
             else:
                 raise KeyError
         except KeyError:
+            for line in board.grid:
+                print(*line)
             print("Invalid move, please try again.")
-            print(self.choose_move(input(f"{self.name}, choose the current location of your piece: "), input("Now choose a new location for the piece: ")))
         
-        return ""
+            return self.choose_move(input(f"{self.name}, choose the current location of your piece: "), input("Now choose a new location for the piece: "))
     
 
 class Board:
@@ -156,108 +158,152 @@ class Piece:
 class Pawn(Piece):
     def __init__(self, colour, piece_name, pawn_num):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "P" + str(pawn_num)
+        self.short_name = colour[0] + "-P" + str(pawn_num)
 
     def valid_move(self, old_location, new_location):
         #Define set moves
         global char_codes
         valid = False
         #Checks if the input is valid
-        if board_dict[old_location].colour == self.colour:
+        if board_dict[old_location].colour == player_names[current_move].colour:
+            print(1)
             if len(new_location) == 2 and len(old_location) == 2:
+                print(2)
                 if new_location[0].lower() in chars and old_location[0].lower() in chars:
+                    print(3)
                     if int(new_location[1]) in char_indices and int(old_location[1]) in char_indices:
+                        print(4)
                         valid = True
                     else:
+                        print(5)
+                        valid = False
                         return valid
                 else:
+                    print(6)
+                    valid = False
                     return valid
             else:
+                print(7)
+                valid = False
                 return valid
+        else:
+            print(8)
+            valid = False
+            return valid
+        
+        #Check if there is a piece in the way
+        if board_dict.get(new_location) != "   0":
+            valid = False
+            return valid
         
         old_location_num = int(old_location[1])
         new_location_num = int(new_location[1])
         
-        #Check if there is a piece in the way
-        if board_dict.get(new_location) != "   0":
-                valid = False
         #Checks if it's black
-        if self.colour == "b-":
-            print(self.colour)
+        if self.colour[0] == "b":
             #Makes sure the new location is further into the board than old location
             if new_location_num >= old_location_num:
+                valid = False
                 return valid
+            
             #Check if a piece can be taken
+            print(1)
             if new_location_num == old_location_num - 1:
+                print(2)
                 if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1):
-                    if board_dict[new_location].short_name == "w-":
+                    print(4)
+                    if board_dict[new_location] != "   0" and board_dict[new_location].short_name == "w-":
                         board_dict[new_location].taken = True
                         board_dict[new_location].taken()
                         board.update_board(old_location, new_location)
-                        
                         valid = True
-                        return True
-                    elif board_dict[new_location].short_name == "b-":
+                    else:
                         valid = False
-                        return valid
+                    
+                    return valid
+        
             #Standard move
-            if new_location_num <= 8:
-                #Pawn changes to any piece if it reaches end of board
-                if new_location_num == 8:
-                    valid = True
-                    self.change_piece(input("Choose what you would like the pawn to change to: "))
-                    return valid
-                #Move one place
-                elif new_location_num == old_location_num - 1:
-                    valid = True
+            if new_location[0] == old_location[0]:
+                if new_location_num <= 8:
+                    #Pawn changes to any piece if it reaches end of board
+                    if new_location_num == 8:
+                        valid = True
+                        self.change_piece(input("Choose what you would like the pawn to change to: "))
+                        return valid
+                    #Move one place
+                    elif new_location_num == old_location_num - 1:
+                        valid = True
+                        return valid
+            else:
+                valid = False
+                return valid
+                    
+            
             #Pawn can move two places on first move
-            if old_location_num == 7:
-                if new_location_num == 5:
-                    valid = True
-                elif new_location_num == 6:
-                    valid = True
-                else:
-                    valid = False
+            if new_location[0] == old_location[0]:
+                if old_location_num == 7:
+                    if new_location_num == 5:
+                        valid = True
+                    elif new_location_num == 6:
+                        valid = True
+                    else:
+                        valid = False
+                    
                     return valid
+            else:
+                valid = False
+                return valid
             
         #Checks if it's white
-        elif self.colour == "w-":
-            print(self.colour)
+        elif self.colour[0] == "w":
             #Makes sure the new location is further into the board than old location
             if new_location_num <= old_location_num:
+                valid = False
                 return valid
+            
             #Check if a piece can be taken
             if new_location_num == old_location_num + 1:
-                if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1):
-                    if board_dict[new_location].short_name == "w-":
+                if (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) + 1) or (int(char_codes.get(new_location[0].lower())) == int(char_codes.get(old_location[0].lower())) - 1):
+                    if board_dict[new_location] != "   0" and board_dict[new_location].short_name == "b-":
                         board_dict[new_location].taken = True
                         board_dict[new_location].taken()
                         board.update_board(old_location, new_location)
-                        
                         valid = True
-                        return True
-                    elif board_dict[new_location].short_name == "b-":
+                    else:
                         valid = False
-                        return valid
+                    
+                    return valid 
+            
             #Standard move
-            if new_location_num >= 1:
-                #Pawn changes to any piece if it reaches end of board
-                if new_location_num == 1:
-                    valid = True
-                    self.change_piece(input("Choose what you would like the pawn to change to: "))
+            if new_location[0] == old_location[0]:
+                if new_location_num <= 1:
+                    #Pawn changes to any piece if it reaches end of board
+                    if new_location_num == 1:
+                        valid = True
+                        self.change_piece(input("Choose what you would like the pawn to change to: "))
+                    #Move one place
+                    elif new_location_num == old_location_num + 1:
+                        valid = True
+                        
                     return valid
-                #Move one place
-                elif new_location_num == old_location_num + 1:
-                    valid = True
+            else:
+                valid = False
+                return valid
+            
             #Pawn can move two places on first move
-            if old_location_num == 2:
-                if new_location_num == 4:
-                    valid = True
-                elif new_location_num == 3:
-                    valid = True
-                else:
-                    valid = False
+            if new_location[0] == old_location[0]:
+                if old_location_num == 2:
+                    if new_location_num == 4:
+                        valid = True
+                    elif new_location_num == 3:
+                        valid = True
+                    else:
+                        valid = False
+                    
                     return valid
+            else:
+                valid = False
+                return valid
         
         return valid
 
@@ -272,7 +318,7 @@ class Pawn(Piece):
 class Rook(Piece):
     def __init__(self, colour, piece_name):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "Rk"
+        self.short_name = colour[0] + "-Rk"
 
     def valid_move(self):
         pass
@@ -283,7 +329,7 @@ class Rook(Piece):
 class Knight(Piece):
     def __init__(self, colour, piece_name):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "Kn"
+        self.short_name = colour[0] + "-Kn"
 
     def valid_move(self):
         pass
@@ -291,7 +337,7 @@ class Knight(Piece):
 class Bishop(Piece):
     def __init__(self, colour, piece_name):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "Bs"
+        self.short_name = colour[0] + "-Bs"
 
     def valid_move(self):
         pass
@@ -299,7 +345,7 @@ class Bishop(Piece):
 class Queen(Piece):
     def __init__(self, colour, piece_name):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "Qu"
+        self.short_name = colour[0] + "-Qu"
 
     def valid_move(self):
         pass
@@ -307,7 +353,7 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, colour, piece_name):
         super().__init__(colour, piece_name)
-        self.short_name = colour + "Kg"
+        self.short_name = colour[0] + "-Kg"
 
     def valid_move(self):
         pass
@@ -317,12 +363,12 @@ class King(Piece):
 black = "b-"
 white = "w-"
 game_state = False
-black_pawns, white_pawns = [Pawn(black, "pawn", i) for i in range(1, 9)], [Pawn(white, "pawn", i) for i in range(1, 9)]
-black_rook, white_rook = Rook(black, "rook"), Rook(white, "rook")
-black_bishop, white_bishop = Bishop(black, "bishop"), Bishop(white, "bishop")
-black_knight, white_knight = Knight(black, "knight"), Knight(white, "knight")
-black_queen, white_queen = Queen(black, "queen"), Queen(white, "queen")
-black_king, white_king = King(black, "king"), King(white, "king")
+black_pawns, white_pawns = [Pawn("black", "pawn", i) for i in range(1, 9)], [Pawn("white", "pawn", i) for i in range(1, 9)]
+black_rook, white_rook = Rook("black", "rook"), Rook("white", "rook")
+black_bishop, white_bishop = Bishop("black", "bishop"), Bishop("white", "bishop")
+black_knight, white_knight = Knight("black", "knight"), Knight("white", "knight")
+black_queen, white_queen = Queen("black", "queen"), Queen("white", "queen")
+black_king, white_king = King("black", "king"), King("white", "king")
 
 valid_dict = {
     "black_pieces" : {
