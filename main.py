@@ -33,7 +33,6 @@ class Player:
                 chosen_piece = board_dict[old_location]
                 #Check if piece is in way
                 if chosen_piece.valid_move(old_location, new_location):
-                    board.update_board(old_location, new_location)
                     for line in board.grid:
                         print(*line)
                     return "Valid Move"
@@ -41,7 +40,7 @@ class Player:
                     raise KeyError
             else:
                 raise KeyError
-        except KeyError:
+        except (KeyError, AttributeError):
             for line in board.grid:
                 print(*line)
             print("Invalid move, please try again.")
@@ -115,20 +114,25 @@ class Board:
         
         return ""
     
-    def update_board(self, old_location, new_location):
+    def update_board(self, old_location, new_location, new_piece):
         #Update the new location in the displayed board
         for x, item in enumerate(board.grid):
             for y in range(len(item)):
                 if (8 - int(new_location[1])) == x:
                     if char_codes[new_location[0].lower()] - 1 == y:
-                        board.grid[x][y] = "[" + str(new_location) + ": " + str(board_dict[old_location].short_name) + "]"
+                        if new_piece == False:
+                            if board_dict[old_location] != "   0":
+                                board.grid[x][y] = "[" + str(new_location) + ": " + str(board_dict[old_location].short_name) + "]"
+                        else:
+                            board.grid[x][y] = "[" + str(new_location) + ": " + new_piece.short_name + "]"
                 elif (8 - int(old_location[1])) == x:
                     if char_codes[old_location[0].lower()] - 1 == y:
                         board.grid[x][y] = "[" + str(old_location) + ": " + "   0" + "]"
                         
         #Update the new location in the board dictionary
-        board_dict[new_location] = board_dict[old_location]
-        board_dict[old_location] = "   0"
+        if new_piece == False:
+            board_dict[new_location] = board_dict[old_location]
+            board_dict[old_location] = "   0"
             
         return ""
 
@@ -162,11 +166,15 @@ class Pawn(Piece):
         global char_codes
         valid = False
         #Checks if the input is valid
-        if board_dict[old_location].colour == player_names[current_move].colour:
-            if len(new_location) == 2 and len(old_location) == 2:
-                if new_location[0].lower() in chars and old_location[0].lower() in chars:
-                    if int(new_location[1]) in char_indices and int(old_location[1]) in char_indices:
-                        valid = True
+        if board_dict[old_location] != "   0":
+            if board_dict[old_location].colour == player_names[current_move].colour:
+                if len(new_location) == 2 and len(old_location) == 2:
+                    if new_location[0].lower() in chars and old_location[0].lower() in chars:
+                        if int(new_location[1]) in char_indices and int(old_location[1]) in char_indices:
+                            valid = True
+                        else:
+                            valid = False
+                            return valid
                     else:
                         valid = False
                         return valid
@@ -187,14 +195,14 @@ class Pawn(Piece):
         new_column = new_location[0]
         
         #First check if both inputs are in the same column or if the new location is diagonal to the old location
-        if prev_column == new_column or char_codes[prev_column] + 1 == char_codes[new_column] or char_codes[prev_column] - 1 == char_codes[new_column]:
+        if char_codes[prev_column.lower()] + 1 == char_codes[new_column.lower()] or char_codes[prev_column.lower()] - 1 == char_codes[new_column.lower()] or prev_column == new_column:
             if board_dict[old_location].colour[0] == "b":
                 #Black side first
                 #Check if new location is further into the board than old location
                 if old_location_num > new_location_num and new_location_num >= 1:
                     #Check diagonal blockages and valid moves
                     if old_location_num - 1 == new_location_num and prev_column != new_column:
-                        if char_codes[prev_column] + 1 == char_codes[new_column] or char_codes[prev_column] - 1 == char_codes[new_column]:
+                        if char_codes[prev_column.lower()] + 1 == char_codes[new_column.lower()] or char_codes[prev_column.lower()] - 1 == char_codes[new_column.lower()]:
                             if board_dict[new_location] != "   0" and board_dict[new_location].colour[0] != self.colour[0]:
                                 valid = True
                             else:
@@ -225,8 +233,9 @@ class Pawn(Piece):
                     
                     #Check if new location is at the end of the board
                     if new_location_num == 1:
-                        self.change_piece(input("Choose what you would like the pawn to change to: "))
+                        self.change_piece(input("Choose what you would like the pawn to change to: "), new_location, old_location)
                         valid = True
+                        return valid
                 
                 else:
                     valid = False
@@ -237,7 +246,7 @@ class Pawn(Piece):
                 if old_location_num < new_location_num and new_location_num <= 8:
                     #Check diagonal blockages and valid moves
                     if old_location_num + 1 == new_location_num and prev_column != new_column:
-                        if char_codes[prev_column] + 1 == char_codes[new_column] or char_codes[prev_column] - 1 == char_codes[new_column]:
+                        if char_codes[prev_column.lower()] + 1 == char_codes[new_column.lower()] or char_codes[prev_column.lower()] - 1 == char_codes[new_column.lower()]:
                             if board_dict[new_location] != "   0" and board_dict[new_location].colour[0] != self.colour[0]:
                                 valid = True
                             else:
@@ -268,27 +277,29 @@ class Pawn(Piece):
                     
                     #Check if new location is at the end of the board
                     if new_location_num == 8:
-                        self.change_piece(input("Choose what you would like the pawn to change to: "))
+                        self.change_piece(input("Choose what you would like the pawn to change to: "), new_location, old_location)
                         valid = True
+                        return valid
                 
                 #Check if new location is further into the board than old location
                 else:
                     valid = False
                     return valid
-                
+        
+        board.update_board(old_location, new_location, False)
         return valid
-            
-        #Capture updates the board dict with new piece
-        #Both need capture rule
 
 
     #Pawn change at end of board
-    def change_piece(self, new_piece, new_location):
+    def change_piece(self, new_piece, new_location, old_location):
         if new_piece in new_pieces:
-            board_dict[new_location] = new_piece_objects[new_piece]
+            board_dict[new_location] = new_piece_objects[new_piece](self.colour, new_piece)
+            board.update_board(old_location, new_location, board_dict[new_location])
             return True
         else:
-            return False
+            print("Invalid piece name, please try again.")
+            self.change_piece(input("Choose what you would like the pawn to change to: "), new_location, old_location)
+            
 
 class Rook(Piece):
     def __init__(self, colour, piece_name):
