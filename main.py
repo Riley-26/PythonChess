@@ -134,6 +134,7 @@ class Board:
             board_dict[new_location] = board_dict[old_location]
             board_dict[old_location] = "   0"
             
+        print(board_dict)
         return ""
 
     
@@ -292,7 +293,7 @@ class Pawn(Piece):
 
     #Pawn change at end of board
     def change_piece(self, new_piece, new_location, old_location):
-        if new_piece in new_pieces:
+        if new_piece.lower() in new_pieces:
             board_dict[new_location] = new_piece_objects[new_piece](self.colour, new_piece)
             board.update_board(old_location, new_location, board_dict[new_location])
             return True
