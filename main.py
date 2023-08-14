@@ -116,20 +116,6 @@ class Board:
     
     def update_board(self, old_location, new_location, new_piece):
         #Update the new location in the displayed board
-        # for x, item in enumerate(board.grid):
-        #     for y in range(len(item)):
-        #         print(x, y, item)
-        #         if (8 - int(new_location[1])) == x:
-        #             if char_codes[new_location[0].lower()] - 1 == y:
-        #                 if new_piece == False:
-        #                     if board_dict[old_location] != "   0":
-        #                         board.grid[x][y] = "[" + str(new_location) + ": " + str(board_dict[old_location].short_name) + "]"
-        #                 else:
-        #                     board.grid[x][y] = "[" + str(new_location) + ": " + new_piece.short_name + "]"
-        #         elif (8 - int(old_location[1])) == x:
-        #             if char_codes[old_location[0].lower()] - 1 == y:
-        #                 board.grid[x][y] = "[" + str(old_location) + ": " + "   0" + "]"
-                
         #Update the new location in the board dictionary
         if new_piece == False:
             if board_dict[old_location].colour[0] == "b":
@@ -511,16 +497,115 @@ class Knight(Piece):
         super().__init__(colour, piece_name)
         self.short_name = colour[0] + "-Kn"
 
-    def valid_move(self):
-        pass
+    def valid_move(self, old_location, new_location):
+        if super().valid_input(old_location, new_location) == False:
+            valid = False
+            return valid
+        
+        old_location_num = int(old_location[1])
+        new_location_num = int(new_location[1])
+        
+        prev_column = old_location[0]
+        new_column = new_location[0]
+        
+        valid = False
+        
+        if board_dict[old_location].colour[0] == "b":
+            #Forwards and backwards moves for black side
+            if new_location_num - 2 == old_location_num or new_location_num + 2 == old_location_num:
+                if char_codes[new_column.lower()] - 1 == char_codes[prev_column.lower()] or char_codes[new_column.lower()] + 1 == char_codes[prev_column.lower()]:
+                    if board_dict[new_location] != "   0" and board_dict[new_location].colour[0] == board_dict[old_location].colour[0]:
+                        valid = False
+                        return valid
+                    else:
+                        valid = True
+                else:
+                    valid = False
+                    return valid
+            #Sideways moves for black side
+            elif new_location_num - 1 == old_location_num or new_location_num + 1 == old_location_num:
+                if char_codes[new_column.lower()] - 2 == char_codes[prev_column.lower()] or char_codes[new_column.lower()] + 2 == char_codes[prev_column.lower()]:
+                    valid = True
+                    if board_dict[new_location] != "   0" and board_dict[new_location].colour[0] == board_dict[old_location].colour[0]:
+                        valid = False
+                        return valid
+                else:
+                    valid = False
+                    return valid
+                
+        elif board_dict[old_location].colour[0] == "w":
+            #Forwards and backwards moves for white side
+            if new_location_num - 2 == old_location_num or new_location_num + 2 == old_location_num:
+                if char_codes[new_column.lower()] - 1 == char_codes[prev_column.lower()] or char_codes[new_column.lower()] + 1 == char_codes[prev_column.lower()]:
+                    valid = True
+                    if board_dict[new_location] != "   0" and board_dict[new_location].colour[0] == board_dict[old_location].colour[0]:
+                        valid = False
+                        return valid
+                else:
+                    valid = False
+                    return valid
+            #Sideways moves for white side
+            elif new_location_num - 1 == old_location_num or new_location_num + 1 == old_location_num:
+                if char_codes[new_column.lower()] - 2 == char_codes[prev_column.lower()] or char_codes[new_column.lower()] + 2 == char_codes[prev_column.lower()]:
+                    valid = True
+                    if board_dict[new_location] != "   0" and board_dict[new_location].colour[0] == board_dict[old_location].colour[0]:
+                        valid = False
+                        return valid
+                else:
+                    valid = False
+                    return valid
+            else:
+                valid = False
+                return valid
+        
+        board.update_board(old_location, new_location, False)
+        return valid
+        
 
 class Bishop(Piece):
     def __init__(self, colour, piece_name):
         super().__init__(colour, piece_name)
         self.short_name = colour[0] + "-Bs"
 
-    def valid_move(self):
-        pass
+    def valid_move(self, old_location, new_location):
+        if super().valid_input(old_location, new_location) == False:
+            valid = False
+            return valid
+        
+        old_location_num = int(old_location[1])
+        new_location_num = int(new_location[1])
+        
+        prev_column = old_location[0]
+        new_column = new_location[0]
+        
+        valid = False
+        
+        #Check input, black side
+        if abs(old_location_num - new_location_num) == abs(char_codes[prev_column.lower()] - char_codes[new_column.lower()]):
+            greater_num = new_location_num > old_location_num
+            #Check final location first, if invalid then the blockage checks can be skipped
+            if board_dict[new_location] != "   0" or self.colour[0] == board_dict[new_location].colour[0] or old_location_num == new_location_num or prev_column == new_column:
+                valid = False
+                return valid
+            else:
+                for i in range(old_location_num, new_location_num):
+                    if board_dict[chars[i - 1].upper() + str(i)] == "   0":
+                        valid = True
+                    elif i == new_location_num and board_dict[chars[i - 1].upper() + str(i)].colour[0] == board_dict[new_location].colour[0]:
+                        valid = True
+                    else:
+                        valid = False
+                        return valid
+                
+            
+                
+        #Check blockages
+        
+        
+        
+        board.update_board(old_location, new_location, False)
+        return valid
+        
 
 class Queen(Piece):
     def __init__(self, colour, piece_name):
