@@ -580,28 +580,94 @@ class Bishop(Piece):
         
         valid = False
         
-        #Check input, black side
+        #Check input
         if abs(old_location_num - new_location_num) == abs(char_codes[prev_column.lower()] - char_codes[new_column.lower()]):
-            greater_num = new_location_num > old_location_num
             #Check final location first, if invalid then the blockage checks can be skipped
-            if board_dict[new_location] != "   0" or self.colour[0] == board_dict[new_location].colour[0] or old_location_num == new_location_num or prev_column == new_column:
+            if (board_dict[new_location] != "   0" and board_dict[old_location].colour[0] == board_dict[new_location].colour[0]) or old_location_num == new_location_num or prev_column == new_column:
                 valid = False
                 return valid
             else:
-                for i in range(old_location_num, new_location_num):
-                    if board_dict[chars[i - 1].upper() + str(i)] == "   0":
-                        valid = True
-                    elif i == new_location_num and board_dict[chars[i - 1].upper() + str(i)].colour[0] == board_dict[new_location].colour[0]:
-                        valid = True
-                    else:
-                        valid = False
+                if new_location_num > old_location_num:
+                    #Up the board
+                    if old_location[0] > new_location[0]:
+                        iter = char_codes[old_location[0].lower()] - 2
+                        #Up left
+                        for i in range(old_location_num + 1, new_location_num + 1):
+                            if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                iter -= 1
+                                continue
+                            elif i == new_location_num and board_dict[chars[iter].upper() + str(i)].colour[0] == board_dict[old_location].colour[0]:
+                                valid = True
+                                iter -= 1
+                                continue
+                            else:
+                                valid = False
+                                iter -= 1
+                                break
+                            
+                    elif old_location[0] < new_location[0]:
+                        iter = char_codes[old_location[0].lower()]
+                        #Up right
+                        for i in range(old_location_num + 1, new_location_num + 1):
+                            if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                iter += 1
+                                continue
+                            elif i == old_location_num and board_dict[chars[iter].upper() + str(i)].colour[0] == board_dict[old_location].colour[0]:
+                                valid = True
+                                iter += 1
+                                continue
+                            else:
+                                valid = False
+                                iter += 1
+                                break
+                        
+                    if valid == False:
                         return valid
-                
-            
-                
-        #Check blockages
-        
-        
+                        
+                elif new_location_num < old_location_num:
+                    #Down the board
+                    if old_location[0] > new_location[0]:
+                        iter = char_codes[new_location[0].lower()] - 1
+                        #Down left
+                        for i in range(new_location_num, old_location_num):
+                            if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                iter += 1
+                                continue
+                            elif i == old_location_num and board_dict[chars[iter].upper() + str(i)].colour[0] == board_dict[old_location].colour[0]:
+                                valid = True
+                                iter += 1
+                                continue
+                            else:
+                                valid = False
+                                iter += 1
+                                break
+                            
+                    elif old_location[0] < new_location[0]:
+                        iter = char_codes[old_location[0].lower()] + 1
+                        #Down right
+                        for i in range(new_location_num, old_location_num):
+                            if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                iter -= 1
+                                continue
+                            elif i == old_location_num and board_dict[chars[iter].upper() + str(i)].colour[0] == board_dict[old_location].colour[0]:
+                                valid = True
+                                iter -= 1
+                                continue
+                            else:
+                                valid = False
+                                iter -= 1
+                                break
+                        
+                    if valid == False:
+                        return valid
+                      
+        else:
+            valid = False
+            return valid
         
         board.update_board(old_location, new_location, False)
         return valid
@@ -621,7 +687,12 @@ class King(Piece):
         self.short_name = colour[0] + "-Kg"
 
     def valid_move(self):
+        
+        #Check if horizontal/vertical or diagonal
+        
         pass
+    
+    
 
 
 #Setting global variables
