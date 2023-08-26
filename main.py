@@ -142,13 +142,17 @@ class Piece:
         self.piece_name = piece_name
         
     def valid_input(self, old_location, new_location):
-        if board_dict[old_location] != "   0":
-            if board_dict[old_location].colour == player_names[current_move].colour:
-                if len(new_location) == 2 and len(old_location) == 2:
-                    if new_location[0].lower() in chars and old_location[0].lower() in chars:
-                        if int(new_location[1]) in char_indices and int(old_location[1]) in char_indices:
-                            valid = True
-                            return valid
+        if old_location.upper() != new_location.upper():
+            if board_dict[old_location] != "   0":
+                if board_dict[old_location].colour == player_names[current_move].colour:
+                    if len(new_location) == 2 and len(old_location) == 2:
+                        if new_location[0].lower() in chars and old_location[0].lower() in chars:
+                            if int(new_location[1]) in char_indices and int(old_location[1]) in char_indices:
+                                valid = True
+                                return valid
+                            else:
+                                valid = False
+                                return valid
                         else:
                             valid = False
                             return valid
@@ -313,177 +317,71 @@ class Rook(Piece):
         
         valid = False
         
-        #Black side
-        if board_dict[old_location].colour[0] == "b":
-            #Check column blocks
-            if prev_column == new_column:
-                if board_dict[new_location] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                    valid = True
-                else:
-                  valid = False
-                  return valid
-                  
-                #Black forwards move
-                if old_location_num > new_location_num:
-                    for i in range(old_location_num - 1, new_location_num - 1, - 1):
-                        if board_dict[prev_column + str(i)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            break
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                
-                #Black backwards move
-                elif old_location_num < new_location_num:
-                    for i in range(old_location_num + 1, new_location_num + 1):
-                        if board_dict[prev_column + str(i)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            break
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                    
-            #Check row blocks
-            elif old_location_num == new_location_num:
-                if board_dict[new_location] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                    valid = True
-                else:
-                  valid = False
-                  return valid
-                
-                #Black right move
-                if prev_column < new_column:
-                    for i in range(int(char_codes[prev_column.lower()]) + 1, int(char_codes[new_column.lower()]) + 1):
-                        if board_dict[chars[i - 1].upper() + str(new_location_num)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            return valid
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                        
-                #Black left move
-                elif prev_column > new_column:
-                    for i in range(int(char_codes[prev_column.lower()]) - 1, int(char_codes[new_column.lower()]) - 1, - 1):
-                        if board_dict[chars[i - 1].upper() + str(new_location_num)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            return valid
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                    
-            else:
+        #Check input
+        if old_location_num == new_location_num or prev_column == new_column:
+            #Check final location first, if colour is the same then the function can be skipped
+            if board_dict[new_location] != "   0" and board_dict[old_location].colour[0] == board_dict[new_location].colour[0]:
                 valid = False
                 return valid
-                    
-        #White side
-        elif board_dict[old_location].colour[0] == "w":
-            #Check column blocks
-            if prev_column == new_column:
-                if board_dict[new_location] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                    valid = True
-                else:
-                  valid = False
-                  return valid
-                
-                #White forwards move
-                if old_location_num < new_location_num:
-                    for i in range(old_location_num + 1, new_location_num + 1):
-                        if board_dict[prev_column + str(i)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            return valid
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                        
-                #White backwards move
-                elif old_location_num > new_location_num:
-                    for i in range(old_location_num - 1, new_location_num - 1, - 1):
-                        if board_dict[prev_column + str(i)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            return valid
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                    
-            #Check row blocks
-            elif old_location_num == new_location_num:
-                if board_dict[new_location] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                    valid = True
-                else:
-                  valid = False
-                  return valid
-                
-                #White right move
-                if prev_column < new_column:
-                    for i in range(int(char_codes[prev_column.lower()]) + 1, int(char_codes[new_column.lower()]) + 1):
-                        if board_dict[chars[i - 1].upper() + str(new_location_num)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            return valid
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                
-                #White left move
-                elif prev_column > new_column:
-                    for i in range(int(char_codes[prev_column.lower()]) - 1, int(char_codes[new_column.lower()]) - 1, - 1):
-                        if board_dict[chars[i - 1].upper() + str(new_location_num)] == "   0" or board_dict[new_location].colour[0] != self.colour[0]:
-                            valid = True
-                            continue
-                        elif board_dict[new_location].colour[0] == self.colour[0]:
-                            valid = False
-                            return valid
-                        else:
-                            valid = False
-                            break
-                        
-                    if valid == False:
-                        return valid
-                        
             else:
-                valid = False
-                return valid
+                #Down/upwards move
+                if prev_column == new_column:
+                    #Downwards move
+                    if new_location_num < old_location_num:
+                        for i in range(new_location_num, old_location_num):
+                            if board_dict[prev_column.upper() + str(i)] == "   0":
+                                valid = True
+                                continue
+                            elif i == new_location_num and board_dict[prev_column.upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                continue
+                            else:
+                                valid = False
+                                break
+                    #Upwards move
+                    elif new_location_num > old_location_num:
+                        for i in range(old_location_num + 1, new_location_num + 1):
+                            if board_dict[prev_column.upper() + str(i)] == "   0":
+                                valid = True
+                                continue
+                            elif i == new_location_num and board_dict[prev_column.upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                continue
+                            else:
+                                valid = False
+                                break
+                elif new_location_num == old_location_num:
+                    #Right move
+                    if prev_column < new_column:
+                        for i in range(char_codes[prev_column.lower()] + 1, char_codes[new_column.lower()] + 1):
+                            if board_dict[chars[i - 1].upper() + str(old_location_num)] == "   0":
+                                valid = True
+                                continue
+                            elif i == new_location_num and board_dict[chars[i - 1].upper() + str(old_location_num)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                continue
+                            else:
+                                valid = False
+                                break
+                    #Left move
+                    elif prev_column > new_column:
+                        for i in range(char_codes[new_column.lower()], char_codes[prev_column.lower()]):
+                            if board_dict[chars[i - 1].upper() + str(old_location_num)] == "   0":
+                                valid = True
+                                continue
+                            elif i == new_location_num and board_dict[chars[i - 1].upper() + str(old_location_num)].colour[0] != board_dict[old_location].colour[0]:
+                                valid = True
+                                continue
+                            else:
+                                valid = False
+                                break
+                        
+                if valid == False:
+                    return valid
+                        
+        else:
+            valid = False
+            return valid
         
                 
         board.update_board(old_location, new_location, False)
