@@ -30,17 +30,44 @@ class Player:
         new_location = new_location.upper()
         try:
             if old_location in board_dict:
-                chosen_piece = board_dict[old_location]
-                #Check if piece is in way
-                if chosen_piece.valid_move(old_location, new_location):
-                    for line in board.grid:
-                        print(*line)
-                    return "Valid Move"
+                if player_names[current_move].in_check == True and self.colour[0] == "b":
+                    if old_location != king_location_b:
+                        raise KeyError
+                    else:
+                        chosen_piece = board_dict[old_location]
+                        #Check if piece is in way
+                        if chosen_piece.valid_move(old_location, new_location):
+                            for line in board.grid:
+                                print(*line)
+                            return ""
+                        else:
+                            raise KeyError
+                elif player_names[current_move].in_check == True and self.colour[0] == "w":
+                    if old_location != king_location_w:
+                        raise KeyError
+                    else:
+                        chosen_piece = board_dict[old_location]
+                        #Check if piece is in way
+                        if chosen_piece.valid_move(old_location, new_location):
+                            for line in board.grid:
+                                print(*line)
+                            return ""
+                        else:
+                            raise KeyError
                 else:
-                    raise KeyError
+                    chosen_piece = board_dict[old_location]
+                    #Check if piece is in way
+                    if chosen_piece.valid_move(old_location, new_location):
+                        for line in board.grid:
+                            print(*line)
+                        return ""
+                    else:
+                        raise KeyError
             else:
                 raise KeyError
         except (KeyError, AttributeError):
+            if player_names[current_move].in_check == True:
+                print(f"{player_names[current_move].name}'s King is in check.")
             for line in board.grid:
                 print(*line)
             print("Invalid move, please try again.")
@@ -287,10 +314,16 @@ class Pawn(Piece):
                     valid = False
                     return valid
                 
-        board_dict[king_location_b].check_move(king_location_b, king_location_b)
-        board_dict[king_location_w].check_move(king_location_w, king_location_w)
         
         board.update_board(old_location, new_location, False)
+        if self.colour[0] == "w":
+            if board_dict[king_location_b].check_move(king_location_b, king_location_b) == True:
+                player1.in_check = True
+                print(f"{player1.name}'s King is in check.")
+        elif self.colour[0] == "b":
+            if board_dict[king_location_w].check_move(king_location_w, king_location_w) == True:
+                player2.in_check = True
+                print(f"{player2.name}'s King is in check.")
         return valid
 
 
@@ -390,10 +423,16 @@ class Rook(Piece):
             valid = False
             return valid
         
-        board_dict[king_location_b].check_move(king_location_b, king_location_b)
-        board_dict[king_location_w].check_move(king_location_w, king_location_w)
                 
         board.update_board(old_location, new_location, False)
+        if self.colour[0] == "w":
+            if board_dict[king_location_b].check_move(king_location_b, king_location_b) == True:
+                player1.in_check = True
+                print(f"{player1.name}'s King is in check.")
+        elif self.colour[0] == "b":
+            if board_dict[king_location_w].check_move(king_location_w, king_location_w) == True:
+                player2.in_check = True
+                print(f"{player2.name}'s King is in check.")
         return valid
     
     def castling(self):
@@ -464,10 +503,16 @@ class Knight(Piece):
                 valid = False
                 return valid
             
-        board_dict[king_location_b].check_move(king_location_b, king_location_b)
-        board_dict[king_location_w].check_move(king_location_w, king_location_w)
         
         board.update_board(old_location, new_location, False)
+        if self.colour[0] == "w":
+            if board_dict[king_location_b].check_move(king_location_b, king_location_b) == True:
+                player1.in_check = True
+                print(f"{player1.name}'s King is in check.")
+        elif self.colour[0] == "b":
+            if board_dict[king_location_w].check_move(king_location_w, king_location_w) == True:
+                player2.in_check = True
+                print(f"{player2.name}'s King is in check.")
         return valid
         
 
@@ -578,10 +623,16 @@ class Bishop(Piece):
             valid = False
             return valid
         
-        board_dict[king_location_b].check_move(king_location_b, king_location_b)
-        board_dict[king_location_w].check_move(king_location_w, king_location_w)
         
         board.update_board(old_location, new_location, False)
+        if self.colour[0] == "w":
+            if board_dict[king_location_b].check_move(king_location_b, king_location_b) == True:
+                player1.in_check = True
+                print(f"{player1.name}'s King is in check.")
+        elif self.colour[0] == "b":
+            if board_dict[king_location_w].check_move(king_location_w, king_location_w) == True:
+                player2.in_check = True
+                print(f"{player2.name}'s King is in check.")
         return valid
         
 
@@ -767,10 +818,16 @@ class Queen(Piece):
             valid = False
             return valid
         
-        board_dict[king_location_b].check_move(king_location_b, king_location_b)
-        board_dict[king_location_w].check_move(king_location_w, king_location_w)
                     
         board.update_board(old_location, new_location, False)
+        if self.colour[0] == "w":
+            if board_dict[king_location_b].check_move(king_location_b, king_location_b) == True:
+                player1.in_check = True
+                print(f"{player1.name}'s King is in check.")
+        elif self.colour[0] == "b":
+            if board_dict[king_location_w].check_move(king_location_w, king_location_w) == True:
+                player2.in_check = True
+                print(f"{player2.name}'s King is in check.")
         return valid
             
 
@@ -787,6 +844,46 @@ class King(Piece):
         
         b_check = False
         w_check = False
+        
+        global king_valid_moves_w
+        global king_valid_moves_b
+        global king_location_w
+        global king_location_b
+        player_names[current_move].in_check = False
+        
+        if self.colour[0] == "b":
+            king_valid_moves_b = []
+        elif self.colour[0] == "w":
+            king_valid_moves_w = []
+        
+        king_iter_row = -1
+        king_iter_col = -2
+        
+        for i in range(9):
+            king_iter_col += 1
+            if king_iter_col == 2:
+                king_iter_col = -1
+                king_iter_row += 1
+                if king_iter_row == 2:
+                    break
+                    
+            if (king_iter_row + location_num < 9 and king_iter_row + location_num > 0) and (king_iter_col + char_codes[location_column] < 9 and king_iter_col + char_codes[location_column] > 0):
+                if chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row) == location.upper():
+                    continue
+                else:
+                    if board_dict[chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row)] == board_dict[old_location.upper()]:
+                        if self.colour[0] == "b":
+                            king_valid_moves_b.append(chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row))
+                        elif self.colour[0] == "w":
+                            king_valid_moves_w.append(chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row))
+                    elif board_dict[chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row)] != "   0" and board_dict[chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row)].colour[0] == self.colour[0]:
+                        continue
+                    else:
+                        if self.colour[0] == "b":
+                            king_valid_moves_b.append(chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row))
+                        elif self.colour[0] == "w":
+                            king_valid_moves_w.append(chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row))
+
         
         if board_dict[old_location].colour[0] == "b":
             #Check all horizontal moves
@@ -962,8 +1059,7 @@ class King(Piece):
                     if board_dict[chars[char_codes[location_column] + pawn_iter_b - 1].upper() + str(location_num - 1)].short_name[0:3] == "w-P":
                         b_check = True
                         return b_check
-                    else:
-                        pawn_iter_b = 1
+                pawn_iter_b = 1
                         
 
         elif board_dict[old_location].colour[0] == "w":
@@ -1137,9 +1233,7 @@ class King(Piece):
                     if board_dict[chars[char_codes[location_column] + pawn_iter_w - 1].upper() + str(location_num + 1)].short_name[0:3] == "b-P":
                         w_check = True
                         return w_check
-                    else:
-                        pawn_iter_w = 1
-            
+                pawn_iter_w = 1
         
         #Do for both colours
         if board_dict[old_location].colour[0] == "b":
@@ -1161,10 +1255,8 @@ class King(Piece):
         
         valid = False
         
-        global king_valid_moves_b
-        global king_valid_moves_w
-        
-        
+        global king_location_w
+        global king_location_b
                 
         if new_location_num == old_location_num + 1 or new_location_num == old_location_num - 1 or new_location_num == old_location_num:
             if char_codes[new_column] == char_codes[prev_column] or char_codes[new_column] + 1 == char_codes[prev_column] or char_codes[new_column] - 1 == char_codes[prev_column]:
@@ -1177,7 +1269,7 @@ class King(Piece):
                     return valid
             else:
                 valid = False
-                return valid
+                return valid     
         
         if self.check_move(old_location, new_location) == False:
             board.update_board(old_location, new_location, False)
@@ -1185,11 +1277,15 @@ class King(Piece):
                 king_location_b = new_location.upper()
             elif self.colour[0] == "w":
                 king_location_w = new_location.upper()
-            player_names[current_move].in_check = True
         else:
-            print(f"{player_names[current_move].name}'s King is in check.")
+            if self.colour[0] == "b":
+                player1.in_check = True
+                print(f"{player1.name}'s King is in check.")
+            elif self.colour[0] == "w":
+                player2.in_check = True
+                print(f"{player2.name}'s King is in check.")
             valid = False
-        
+            
         return valid
     
     
@@ -1301,9 +1397,8 @@ board.create_board()
 
 game_loop()
 
-
-#Check for check after each generic move
 #Lock move to blockage or king move if king in check
+#Update king valid moves based on pieces putting it in check
 
 #Castling
 #Pawn edge of board
