@@ -134,12 +134,28 @@ class Board:
     def update_board(self, old_location, new_location, new_piece, empty):
         #Update the new location in the displayed board
         #Update the new location in the board dictionary
+        
+        #1 = Mid move, checks if piece is blocking check
+        global taken_piece
         if empty == 1:
+            print(1)
+            if board_dict[new_location] == "   0":
+                board.grid[8 - int(new_location[1])][int(char_codes[new_location[0].lower()]) - 1] = "[" + str(new_location) + ": " + str(board_dict[old_location].short_name) + "]"
+            elif board_dict[new_location].colour[0] != board_dict[old_location].colour[0]:
+                taken_piece = board_dict[new_location]
+            board_dict[new_location] = board_dict[old_location]
+            board_dict[old_location] = "   0"
             board.grid[8 - int(old_location[1])][int(char_codes[old_location[0].lower()]) - 1] = "[" + str(old_location) + ": " + "   0" + "]"
-            board.grid[8 - int(new_location[1])][int(char_codes[new_location[0].lower()]) - 1] = "[" + str(new_location) + ": " + "   0" + "]"
+        #2 = If piece cannot move due to it blocking check
         elif empty == 2:
             board.grid[8 - int(old_location[1])][int(char_codes[old_location[0].lower()]) - 1] = "[" + str(old_location) + ": " + str(board_dict[old_location].short_name) + "]"
-        
+            if board_dict[new_location] == board_dict[old_location]:
+                board.grid[8 - int(new_location[1])][int(char_codes[new_location[0].lower()]) - 1] = "[" + str(new_location) + ": " + "   0" + "]"
+                board_dict[new_location] = board_dict[new_location]
+            else:
+                board_dict[new_location] = taken_piece
+                board.grid[8 - int(new_location[1])][int(char_codes[new_location[0].lower()]) - 1] = "[" + str(new_location) + ": " + taken_piece.short_name + "]"
+        #0 = Generic move
         elif empty == 0:
             if new_piece == False:
                 if board_dict[old_location].colour[0] == "b":
@@ -714,23 +730,34 @@ class Pawn(Piece):
                 else:
                     valid = False
                     return valid
-                
-        if self.colour[0] == "w":
-            if super().check_move(king_location_b, king_location_b, True) == True:
-                player1.in_check = True
-                check_pieces_b.append(new_location)
-                print(f"{player1.name}'s King is in check.")
-        elif self.colour[0] == "b":
-            if super().check_move(king_location_w, king_location_w, True) == True:
-                player2.in_check = True
-                check_pieces_w.append(new_location)
-                print(f"{player2.name}'s King is in check.")
-                
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
         
-        board.update_board(old_location, new_location, False, 0)
+        if valid == True:
+            saved_loc = board_dict[old_location]
+            if self.colour[0] == "w":
+                if super().check_move(king_location_b, king_location_b, True) == True:
+                    player1.in_check = True
+                    check_pieces_b.append(new_location)
+                    print(f"{player1.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_w, king_location_w, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            elif self.colour[0] == "b":
+                if super().check_move(king_location_w, king_location_w, True) == True:
+                    player2.in_check = True
+                    check_pieces_w.append(new_location)
+                    print(f"{player2.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_b, king_location_b, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            
+            board_dict[old_location] = saved_loc
+            board.update_board(old_location, new_location, False, 0)
         
         return valid
 
@@ -836,34 +863,34 @@ class Rook(Piece):
             valid = False
             return valid
         
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
-                
-        if self.colour[0] == "w":
-            if super().check_move(king_location_b, king_location_b, True) == True:
-                player1.in_check = True
-                check_pieces_b.append(new_location)
-                print(f"{player1.name}'s King is in check.")
-            if old_location.upper() == "A1":
-                rook_moved_w[0] = True
-            elif old_location.upper() == "H1":
-                rook_moved_w[1] = True
-        elif self.colour[0] == "b":
-            if super().check_move(king_location_w, king_location_w, True) == True:
-                player2.in_check = True
-                check_pieces_w.append(new_location)
-                print(f"{player2.name}'s King is in check.")
-            if old_location.upper() == "A8":
-                rook_moved_b[0] = True
-            elif old_location.upper() == "H8":
-                rook_moved_b[1] = True
-                
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
-                
-        board.update_board(old_location, new_location, False, 0)
+        
+        if valid == True:
+            saved_loc = board_dict[old_location]
+            if self.colour[0] == "w":
+                if super().check_move(king_location_b, king_location_b, True) == True:
+                    player1.in_check = True
+                    check_pieces_b.append(new_location)
+                    print(f"{player1.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_w, king_location_w, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            elif self.colour[0] == "b":
+                if super().check_move(king_location_w, king_location_w, True) == True:
+                    player2.in_check = True
+                    check_pieces_w.append(new_location)
+                    print(f"{player2.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_b, king_location_b, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            
+            board_dict[old_location] = saved_loc
+            board.update_board(old_location, new_location, False, 0)
         
         return valid
     
@@ -992,33 +1019,34 @@ class Knight(Piece):
                 valid = False
                 return valid
         
-        saved_loc = board_dict[old_location]
-        board_dict[old_location] = "   0"
-        if self.colour[0] == "w":
-            if super().check_move(king_location_b, king_location_b, True) == True:
-                player1.in_check = True
-                check_pieces_b.append(new_location)
-                print(f"{player1.name}'s King is in check.")
-            board.update_board(old_location, new_location, False, 1)
-            if super().check_move(king_location_w, king_location_w, False) == True:
-                valid = False
-                board_dict[old_location] = saved_loc
-                board.update_board(old_location, new_location, False, 2)
-                return valid
-        elif self.colour[0] == "b":
-            if super().check_move(king_location_w, king_location_w, True) == True:
-                player2.in_check = True
-                check_pieces_w.append(new_location)
-                print(f"{player2.name}'s King is in check.")
-            board.update_board(old_location, new_location, False, 1)
-            if super().check_move(king_location_b, king_location_b, False) == True:
-                valid = False
-                board_dict[old_location] = saved_loc
-                board.update_board(old_location, new_location, False, 2)
-                return valid
-           
-        board_dict[old_location] = saved_loc
-        board.update_board(old_location, new_location, False, 0)
+        
+        if valid == True:
+            saved_loc = board_dict[old_location]
+            if self.colour[0] == "w":
+                if super().check_move(king_location_b, king_location_b, True) == True:
+                    player1.in_check = True
+                    check_pieces_b.append(new_location)
+                    print(f"{player1.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_w, king_location_w, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            elif self.colour[0] == "b":
+                if super().check_move(king_location_w, king_location_w, True) == True:
+                    player2.in_check = True
+                    check_pieces_w.append(new_location)
+                    print(f"{player2.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_b, king_location_b, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            
+            board_dict[old_location] = saved_loc
+            board.update_board(old_location, new_location, False, 0)
                 
         return valid
         
@@ -1040,7 +1068,6 @@ class Bishop(Piece):
         new_column = new_location[0]
         
         valid = False
-        
         #Check input
         if abs(old_location_num - new_location_num) == abs(char_codes[prev_column.lower()] - char_codes[new_column.lower()]):
             #Check final location first, if invalid then the blockage checks can be skipped
@@ -1054,6 +1081,7 @@ class Bishop(Piece):
                         iter = char_codes[old_location[0].lower()] - 2
                         #Up left
                         for i in range(old_location_num + 1, new_location_num + 1):
+                            print(chars[iter].upper() + str(i))
                             if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter -= 1
@@ -1071,6 +1099,7 @@ class Bishop(Piece):
                         iter = char_codes[old_location[0].lower()]
                         #Up right
                         for i in range(old_location_num + 1, new_location_num + 1):
+                            print(chars[iter].upper() + str(i))
                             if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter += 1
@@ -1093,6 +1122,7 @@ class Bishop(Piece):
                         iter = char_codes[new_location[0].lower()] - 1
                         #Down left
                         for i in range(new_location_num, old_location_num):
+                            print(chars[iter].upper() + str(i))
                             if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter += 1
@@ -1107,14 +1137,15 @@ class Bishop(Piece):
                                 break
                             
                     elif old_location[0] < new_location[0]:
-                        iter = char_codes[old_location[0].lower()] + 1
+                        iter = char_codes[new_location[0].lower()]
                         #Down right
                         for i in range(new_location_num, old_location_num):
-                            if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                            print(chars[iter - 1].upper() + str(i))
+                            if board_dict[chars[iter - 1].upper() + str(i)] == "   0" or board_dict[chars[iter - 1].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter -= 1
                                 continue
-                            elif i == old_location_num and board_dict[chars[iter].upper() + str(i)].colour[0] == board_dict[old_location].colour[0]:
+                            elif i == old_location_num and board_dict[chars[iter - 1].upper() + str(i)].colour[0] == board_dict[old_location].colour[0]:
                                 valid = True
                                 iter -= 1
                                 continue
@@ -1122,7 +1153,7 @@ class Bishop(Piece):
                                 valid = False
                                 iter -= 1
                                 break
-                        
+                    
                     if valid == False:
                         return valid
                       
@@ -1130,26 +1161,33 @@ class Bishop(Piece):
             valid = False
             return valid
         
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
-        
-        if self.colour[0] == "w":
-            if super().check_move(king_location_b, king_location_b, True) == True:
-                player1.in_check = True
-                check_pieces_b.append(new_location)
-                print(f"{player1.name}'s King is in check.")
-        elif self.colour[0] == "b":
-            if super().check_move(king_location_w, king_location_w, True) == True:
-                player2.in_check = True
-                check_pieces_w.append(new_location)
-                print(f"{player2.name}'s King is in check.")
-                
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
-                
-        board.update_board(old_location, new_location, False, 0)
+        if valid == True:
+            saved_loc = board_dict[old_location]
+            if self.colour[0] == "w":
+                if super().check_move(king_location_b, king_location_b, True) == True:
+                    player1.in_check = True
+                    check_pieces_b.append(new_location)
+                    print(f"{player1.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_w, king_location_w, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            elif self.colour[0] == "b":
+                if super().check_move(king_location_w, king_location_w, True) == True:
+                    player2.in_check = True
+                    check_pieces_w.append(new_location)
+                    print(f"{player2.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_b, king_location_b, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            
+            board_dict[old_location] = saved_loc
+            board.update_board(old_location, new_location, False, 0)
         
         return valid
         
@@ -1338,30 +1376,33 @@ class Queen(Piece):
             valid = False
             return valid
         
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
-                    
-        if self.colour[0] == "w":
-            if super().check_move(king_location_b, king_location_b, True) == True:
-                player1.in_check = True
-                check_pieces_b.append(new_location)
-                print(f"{player1.name}'s King is in check.")
-            else:
-                player1.in_check = False
-        elif self.colour[0] == "b":
-            if super().check_move(king_location_w, king_location_w, True) == True:
-                player2.in_check = True
-                check_pieces_w.append(new_location)
-                print(f"{player2.name}'s King is in check.")
-            else:
-                player2.in_check = False
-                
-        if player_names[current_move].in_check == True:
-            valid = False
-            return valid
-                
-        board.update_board(old_location, new_location, False, 0)
+        if valid == True:
+            saved_loc = board_dict[old_location]
+            if self.colour[0] == "w":
+                if super().check_move(king_location_b, king_location_b, True) == True:
+                    player1.in_check = True
+                    check_pieces_b.append(new_location)
+                    print(f"{player1.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_w, king_location_w, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            elif self.colour[0] == "b":
+                if super().check_move(king_location_w, king_location_w, True) == True:
+                    player2.in_check = True
+                    check_pieces_w.append(new_location)
+                    print(f"{player2.name}'s King is in check.")
+                board.update_board(old_location, new_location, False, 1)
+                if super().check_move(king_location_b, king_location_b, False) == True:
+                    valid = False
+                    board_dict[old_location] = saved_loc
+                    board.update_board(old_location, new_location, False, 2)
+                    return valid
+            
+            board_dict[old_location] = saved_loc
+            board.update_board(old_location, new_location, False, 0)
                 
         return valid
             
@@ -1579,6 +1620,7 @@ past_moves = []
 check_pieces_b = []
 check_pieces_w = []
 valid_input = []
+taken_piece = ""
 
 board.create_board()
 
@@ -1586,7 +1628,6 @@ game_loop()
 
 #Valid moves changing after not moving king?
 #Draw determination, if all items in valid mvoes are true then check if king is in check, if yes check if pieces putting king in check can be taken
-#Piece protecting king must stay there if king would be in check
 
 #Check if piece putting king in check can be taken
 #Or check if locations in between king and check piece can have a piece move into for a blockage
