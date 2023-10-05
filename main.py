@@ -34,27 +34,14 @@ class Player:
         
         try:
             if old_location in board_dict:
-                if len(valid_input) > 0:
-                    if new_location in valid_input or board_dict[old_location].short_name[2:] == "Kg":
-                        chosen_piece = board_dict[old_location]
-                        #Check if piece is in way
-                        if chosen_piece.valid_move(old_location, new_location):
-                            for line in board.grid:
-                                print(*line)
-                            return ""
-                        else:
-                            raise KeyError
-                    else:
-                        raise KeyError
+                chosen_piece = board_dict[old_location]
+                #Check if piece is in way
+                if chosen_piece.valid_move(old_location, new_location):
+                    for line in board.grid:
+                        print(*line)
+                    return ""
                 else:
-                    chosen_piece = board_dict[old_location]
-                    #Check if piece is in way
-                    if chosen_piece.valid_move(old_location, new_location):
-                        for line in board.grid:
-                            print(*line)
-                        return ""
-                    else:
-                        raise KeyError
+                    raise KeyError
             else:
                 raise KeyError
         except (KeyError, AttributeError):
@@ -138,7 +125,6 @@ class Board:
         #1 = Mid move, checks if piece is blocking check
         global taken_piece
         if empty == 1:
-            print(1)
             if board_dict[new_location] == "   0":
                 board.grid[8 - int(new_location[1])][int(char_codes[new_location[0].lower()]) - 1] = "[" + str(new_location) + ": " + str(board_dict[old_location].short_name) + "]"
             elif board_dict[new_location].colour[0] != board_dict[old_location].colour[0]:
@@ -226,6 +212,8 @@ class Piece:
         global king_valid_moves_b
         global king_location_w
         global king_location_b
+        global check_piece_b
+        global check_piece_w
         
         if state == True:
             if self.colour[0] == "b":
@@ -251,8 +239,7 @@ class Piece:
                         king_valid_moves_b.append(chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row))
                     elif self.colour[0] == "w":
                         king_valid_moves_w.append(chars[char_codes[location_column] + (king_iter_col - 1)].upper() + str(location_num + king_iter_row))
-
-            
+        
         if board_dict[old_location].colour[0] == "b":
             #Check all horizontal moves
             for i in range(char_codes[location_column] - 1, 0, -1):
@@ -262,6 +249,7 @@ class Piece:
                 elif board_dict[chars[i - 1].upper() + str(location_num)] != "   0":
                     if board_dict[chars[i - 1].upper() + str(location_num)].short_name == "w-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name == "w-Rk":
                         b_check = True
+                        check_piece_b = chars[i - 1].upper() + str(location_num)
                         return b_check
                     elif board_dict[chars[i - 1].upper() + str(location_num)].short_name != "w-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name != "w-Rk":
                         break
@@ -273,6 +261,7 @@ class Piece:
                 elif board_dict[chars[i - 1].upper() + str(location_num)] != "   0":
                     if board_dict[chars[i - 1].upper() + str(location_num)].short_name == "w-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name == "w-Rk":
                         b_check = True
+                        check_piece_b = chars[i - 1].upper() + str(location_num)
                         return b_check
                     elif board_dict[chars[i - 1].upper() + str(location_num)].short_name != "w-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name != "w-Rk":
                         break
@@ -285,6 +274,7 @@ class Piece:
                 elif board_dict[location_column.upper() + str(i)] != "   0":
                     if board_dict[location_column.upper() + str(i)].short_name == "w-Qu" or board_dict[location_column.upper() + str(i)].short_name == "w-Rk":
                         b_check = True
+                        check_piece_b = location_column.upper() + str(i)
                         return b_check
                     elif board_dict[location_column.upper() + str(i)].short_name != "w-Qu" or board_dict[location_column.upper() + str(i)].short_name != "w-Rk":
                         break
@@ -296,6 +286,7 @@ class Piece:
                 elif board_dict[location_column.upper() + str(i)] != "   0":
                     if board_dict[location_column.upper() + str(i)].short_name == "w-Qu" or board_dict[location_column.upper() + str(i)].short_name == "w-Rk":
                         b_check = True
+                        check_piece_b = location_column.upper() + str(i)
                         return b_check
                     elif board_dict[location_column.upper() + str(i)].short_name != "w-Qu" or board_dict[location_column.upper() + str(i)].short_name != "w-Rk":
                         break
@@ -313,6 +304,7 @@ class Piece:
                             if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)] != "   0":
                                 if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Qu":
                                     b_check = True
+                                    check_piece_b = chars[dia_col_b - 1].upper() + str(dia_num_b)
                                     return b_check
                                 elif board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Qu":
                                     dia_col_b = 9
@@ -330,6 +322,7 @@ class Piece:
                             if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)] != "   0":
                                 if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Qu":
                                     b_check = True
+                                    check_piece_b = chars[dia_col_b - 1].upper() + str(dia_num_b)
                                     return b_check
                                 elif board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Qu":
                                     dia_col_b = 9
@@ -347,6 +340,7 @@ class Piece:
                             if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)] != "   0":
                                 if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Qu":
                                     b_check = True
+                                    check_piece_b = chars[dia_col_b - 1].upper() + str(dia_num_b)
                                     return b_check
                                 elif board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Qu":
                                     dia_col_b = 9
@@ -364,6 +358,7 @@ class Piece:
                             if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)] != "   0":
                                 if board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name == "w-Qu":
                                     b_check = True
+                                    check_piece_b = chars[dia_col_b - 1].upper() + str(dia_num_b)
                                     return b_check
                                 elif board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Bs" or board_dict[chars[dia_col_b - 1].upper() + str(dia_num_b)].short_name != "w-Qu":
                                     dia_col_b = 9
@@ -382,39 +377,45 @@ class Piece:
                     directions.append(directions.pop(0))
                     direction = directions[0]
                 
-            kn_iter_b = -2
             #Check all knight moves
-            for i in range(1, 6):
-                if abs(kn_iter_b) == 2:
-                    if location_num + 1 < 9 and location_num - 1 > 0 and char_codes[location_column] - 2 > 0 and char_codes[location_column] + 2 < 9:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num - 1)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num - 1)].short_name == "w-Kn":
+            kn_iter_b = -1
+            for i in range(-2, 3):
+                #Check bounds
+                if i == 0:
+                    continue
+                
+                if abs(i) == 2 and (location_num + i < 9 and location_num + i > 0):
+                    if kn_iter_b == -1 and (char_codes[location_column] - 1 < 9 and char_codes[location_column] - 1 > 0):
+                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)] != "   0":
+                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)].short_name == "w-Kn":
                                 b_check = True
+                                check_piece_b = chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)
                                 return b_check
-                    if location_num + 1 < 9 and location_num - 1 > 0 and char_codes[location_column] + 2 < 9 and char_codes[location_column] - 2 > 9:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + 1)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + 1)].short_name == "w-Kn":
+                        kn_iter_b = 1
+                    elif kn_iter_b == 1 and (char_codes[location_column] + 1 < 9 and char_codes[location_column] + 1 > 0):
+                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)] != "   0":
+                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)].short_name == "w-Kn":
                                 b_check = True
+                                check_piece_b = chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)
                                 return b_check
-                            
-                    kn_iter_b += 1
+                        kn_iter_b = -2
+                elif abs(i) == 1 and (location_num + i < 9 and location_num + i > 0):
+                    if kn_iter_b == -2 and (char_codes[location_column] - 2 < 9 and char_codes[location_column] - 2 > 0):
+                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)] != "   0":
+                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)].short_name == "w-Kn":
+                                b_check = True
+                                check_piece_b = chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)
+                                return b_check
+                        kn_iter_b = 2
+                    elif kn_iter_b == 2 and (char_codes[location_column] + 2 < 9 and char_codes[location_column] + 2 > 0):
+                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)] != "   0":
+                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)].short_name == "w-Kn":
+                                b_check = True
+                                check_piece_b = chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + i)
+                                return b_check
                         
-                elif abs(kn_iter_b) == 1:
-                    if location_num - 2 > 0 and location_num + 2 < 9 and char_codes[location_column] + 1 < 9 and char_codes[location_column] - 1 > 0:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num - 2)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num - 2)].short_name == "w-Kn":
-                                b_check = True
-                                return b_check
-                    elif location_num + 2 < 9 and location_num - 2 > 0 and char_codes[location_column] + 1 < 9 and char_codes[location_column] - 1 > 0:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + 2)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_b - 1].upper() + str(location_num + 2)].short_name == "w-Kn":
-                                b_check = True
-                                return b_check
-                    
-                    kn_iter_b += 1
-                    
-                elif kn_iter_b == 0:
-                    kn_iter_b += 1
+                else:
+                    continue
             
             #Check pawn moves
             pawn_iter_b = -1
@@ -422,6 +423,7 @@ class Piece:
                 if location_num - 1 > 0 and board_dict[chars[char_codes[location_column] + pawn_iter_b - 1].upper() + str(location_num - 1)] != "   0":
                     if board_dict[chars[char_codes[location_column] + pawn_iter_b - 1].upper() + str(location_num - 1)].short_name[0:3] == "w-P":
                         b_check = True
+                        check_piece_b = chars[char_codes[location_column] + pawn_iter_b - 1].upper() + str(location_num - 1)
                         return b_check
                 pawn_iter_b = 1
                   
@@ -434,6 +436,7 @@ class Piece:
                 elif board_dict[chars[i - 1].upper() + str(location_num)] != "   0":
                     if board_dict[chars[i - 1].upper() + str(location_num)].short_name == "b-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name == "b-Rk":
                         w_check = True
+                        check_piece_w = chars[i - 1].upper() + str(location_num)
                         return w_check
                     elif board_dict[chars[i - 1].upper() + str(location_num)].short_name != "b-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name != "b-Rk":
                         break
@@ -445,6 +448,7 @@ class Piece:
                 elif board_dict[chars[i - 1].upper() + str(location_num)] != "   0":
                     if board_dict[chars[i - 1].upper() + str(location_num)].short_name == "b-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name == "b-Rk":
                         w_check = True
+                        check_piece_w = chars[i - 1].upper() + str(location_num)
                         return w_check
                     elif board_dict[chars[i - 1].upper() + str(location_num)].short_name != "b-Qu" or board_dict[chars[i - 1].upper() + str(location_num)].short_name != "b-Rk":
                         break
@@ -457,6 +461,7 @@ class Piece:
                 elif board_dict[location_column.upper() + str(i)] != "   0":
                     if board_dict[location_column.upper() + str(i)].short_name == "b-Qu" or board_dict[location_column.upper() + str(i)].short_name == "b-Rk":
                         w_check = True
+                        check_piece_w = location_column.upper() + str(i)
                         return w_check
                     elif board_dict[location_column.upper() + str(i)].short_name != "b-Qu" or board_dict[location_column.upper() + str(i)].short_name != "b-Rk":
                         break
@@ -468,6 +473,7 @@ class Piece:
                 elif board_dict[location_column.upper() + str(i)] != "   0":
                     if board_dict[location_column.upper() + str(i)].short_name == "b-Qu" or board_dict[location_column.upper() + str(i)].short_name == "b-Rk":
                         w_check = True
+                        check_piece_w = location_column.upper() + str(i)
                         return w_check
                     elif board_dict[location_column.upper() + str(i)].short_name != "b-Qu" or board_dict[location_column.upper() + str(i)].short_name != "b-Rk":
                         break
@@ -485,6 +491,7 @@ class Piece:
                             if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)] != "   0":
                                 if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Qu":
                                     w_check = True
+                                    check_piece_w = chars[dia_col_w - 1].upper() + str(dia_num_w)
                                     return w_check
                                 elif board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Qu":
                                     dia_col_w = 9
@@ -502,6 +509,7 @@ class Piece:
                             if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)] != "   0":
                                 if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Qu":
                                     w_check = True
+                                    check_piece_w = chars[dia_col_w - 1].upper() + str(dia_num_w)
                                     return w_check
                                 elif board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Qu":
                                     dia_col_w = 9
@@ -519,6 +527,7 @@ class Piece:
                             if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)] != "   0":
                                 if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Qu":
                                     w_check = True
+                                    check_piece_w = chars[dia_col_w - 1].upper() + str(dia_num_w)
                                     return w_check
                                 elif board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Qu":
                                     dia_col_w = 9
@@ -536,6 +545,7 @@ class Piece:
                             if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)] != "   0":
                                 if board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name == "b-Qu":
                                     w_check = True
+                                    check_piece_w = chars[dia_col_w - 1].upper() + str(dia_num_w)
                                     return w_check
                                 elif board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Bs" or board_dict[chars[dia_col_w - 1].upper() + str(dia_num_w)].short_name != "b-Qu":
                                     dia_col_w = 9
@@ -554,34 +564,33 @@ class Piece:
                     directions.append(directions.pop(0))
                     direction = directions[0]
                     
-            
             kn_iter_w = -2
             #Check all knight moves
             for i in range(1, 6):
                 if abs(kn_iter_w) == 2:
-                    if location_num + 1 < 9 and location_num - 1 > 0 and char_codes[location_column] - 2 > 0 and char_codes[location_column] + 2 < 9:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num - 1)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num - 1)].short_name == "b-Kn":
+                    if (location_num + kn_iter_w < 9 and location_num + kn_iter_w > 0) and (char_codes[location_column] + 1 < 9 and char_codes[location_column] - 1 > 0):
+                        if board_dict[chars[char_codes[location_column] - 1].upper() + str(location_num + kn_iter_w)] != "   0":
+                            if board_dict[chars[char_codes[location_column] - 1].upper() + str(location_num + kn_iter_w)].short_name == "b-Kn":
                                 w_check = True
+                                check_piece_b = chars[char_codes[location_column] - 1].upper() + str(location_num + kn_iter_w)
                                 return w_check
-                    if location_num + 1 < 9 and location_num - 1 > 0 and char_codes[location_column] + 2 < 9 and char_codes[location_column] - 2 > 9:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num + 1)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num + 1)].short_name == "b-Kn":
+                        elif board_dict[chars[char_codes[location_column] + 1].upper() + str(location_num + kn_iter_w)] != "   0":
+                            if board_dict[chars[char_codes[location_column] + 1].upper() + str(location_num + kn_iter_w)].short_name == "b-Kn":
                                 w_check = True
+                                check_piece_b = chars[char_codes[location_column] + 1].upper() + str(location_num + kn_iter_w)
                                 return w_check
-                            
-                    kn_iter_w += 1
                         
                 elif abs(kn_iter_w) == 1:
-                    if location_num - 2 > 0 and location_num + 2 < 9 and char_codes[location_column] + 1 < 9 and char_codes[location_column] - 1 > 0:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num - 2)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num - 2)].short_name == "b-Kn":
+                    if (location_num + kn_iter_w < 9 and location_num + kn_iter_w > 0) and (char_codes[location_column] + 2 < 9 and char_codes[location_column] - 2 > 0):
+                        if board_dict[chars[char_codes[location_column] - 2].upper() + str(location_num + kn_iter_w)] != "   0":
+                            if board_dict[chars[char_codes[location_column] - 2].upper() + str(location_num + kn_iter_w)].short_name == "b-Kn":
                                 w_check = True
+                                check_piece_b = chars[char_codes[location_column] - 2].upper() + str(location_num + kn_iter_w)
                                 return w_check
-                    elif location_num + 2 < 9 and location_num - 2 > 0 and char_codes[location_column] + 1 < 9 and char_codes[location_column] - 1 > 0:
-                        if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num + 2)] != "   0":
-                            if board_dict[chars[char_codes[location_column] + kn_iter_w - 1].upper() + str(location_num + 2)].short_name == "b-Kn":
+                        elif board_dict[chars[char_codes[location_column] + 2].upper() + str(location_num + kn_iter_w)] != "   0":
+                            if board_dict[chars[char_codes[location_column] + 2].upper() + str(location_num + kn_iter_w)].short_name == "b-Kn":
                                 w_check = True
+                                check_piece_b = chars[char_codes[location_column] + 2].upper() + str(location_num + kn_iter_w)
                                 return w_check
                     
                     kn_iter_w += 1
@@ -595,9 +604,10 @@ class Piece:
                 if location_num + 1 < 9 and board_dict[chars[char_codes[location_column] + pawn_iter_w - 1].upper() + str(location_num + 1)] != "   0":
                     if board_dict[chars[char_codes[location_column] + pawn_iter_w - 1].upper() + str(location_num + 1)].short_name[0:3] == "b-P":
                         w_check = True
+                        check_piece_w = chars[char_codes[location_column] + pawn_iter_w - 1].upper() + str(location_num + 1)
                         return w_check
                 pawn_iter_w = 1
-        
+                
         #Do for both colours
         if board_dict[old_location].colour[0] == "b":
             return b_check
@@ -617,7 +627,163 @@ class Piece:
             this_range = 13
             
         return this_range
+    
+    def can_block(self, block_range, loc):
+        global board_keys
+        can_block = True
+        
+        if board_dict[loc].colour[0] == "b":
+            for i in block_range:
+                #Check pawn blocks
+                if board_dict[loc[0] + str(int(loc[1]) + 1)] == "   0" or board_dict[loc[0] + str(int(loc[1]) + 2)] == "   0":
+                    continue
+                if board_dict[loc[0] + str(int(loc[1]) + 1)].short_name[0:2] == "b-P":
+                    can_block = True
+                elif board_dict[loc[0] + str(int(loc[1]) + 2)].short_name[0:2] == "b-P":
+                    can_block = True
+                
+                #Check knight blocks
+                if char_codes[loc[0].lower()] + 1 <= 8 and int(loc[1]) + 2 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) + 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) + 2)].short_name == "b-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] + 1 <= 8 and int(loc[1]) - 2 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) - 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) - 2)].short_name == "b-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 1 >= 1 + int(loc[1]) + 2 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) + 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) + 2)].short_name == "b-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 1 >= 1 + int(loc[1]) - 2 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) - 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) - 2)].short_name == "b-Kn":
+                        can_block = True
+                    
+                if char_codes[loc[0].lower()] + 2 <= 8 and int(loc[1]) + 1 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) + 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) + 1)].short_name == "b-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] + 2 <= 8 and int(loc[1]) - 1 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) - 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) - 1)].short_name == "b-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 2 >= 1 + int(loc[1]) + 1 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) + 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) + 1)].short_name == "b-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 2 >= 1 + int(loc[1]) - 1 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) - 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) - 1)].short_name == "b-Kn":
+                        can_block = True
+                        
+                #Check vertical blocks
+                for j in char_indices:
+                    if board_dict[block_range[i][0] + str(j)] == "   0":
+                        continue
+                    if board_dict[block_range[i][0] + str(j)].short_name == "b-Rk" or board_dict[block_range[i][0] + str(j)].short_name == "b-Qu":
+                        can_block = True
+                
+                #Check horizontal blocks
+                for j in chars:
+                    if board_dict[j.upper() + block_range[i][1]] == "   0":
+                        continue
+                    if board_dict[j.upper() + block_range[i][1]].short_name == "b-Rk" or board_dict[j.upper() + block_range[i][1]].short_name == "b-Qu":
+                        can_block = True
 
+                #Check diagonal blocks
+                for j in board_keys:
+                    if abs(char_codes[block_range[i][0]] - block_range[i][1]) == abs(char_codes[j[0]] - j[1]):
+                        if board_dict[j] == "   0":
+                            continue
+                        if board_dict[j].short_name == "b-Bs" or board_dict[j].short_name == "b-Qu":
+                            can_block = True
+                            
+        elif board_dict[loc].colour[0] == "w":
+            for i in block_range:
+                #Check pawn blocks
+                if board_dict[loc[0] + str(int(loc[1]) - 1)] == "   0" or board_dict[loc[0] - str(int(loc[1]) + 2)] == "   0":
+                    continue
+                if board_dict[loc[0] + str(int(loc[1]) - 1)].short_name[0:2] == "w-P":
+                    can_block = True
+                elif board_dict[loc[0] + str(int(loc[1]) - 2)].short_name[0:2] == "w-P":
+                    can_block = True
+                
+                #Check knight blocks
+                if char_codes[loc[0].lower()] + 1 <= 8 and int(loc[1]) + 2 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) + 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) + 2)].short_name == "w-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] + 1 <= 8 and int(loc[1]) - 2 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) - 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 1] + str(int(loc[1]) - 2)].short_name == "w-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 1 >= 1 + int(loc[1]) + 2 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) + 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) + 2)].short_name == "w-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 1 >= 1 + int(loc[1]) - 2 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) - 2)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 1] + str(int(loc[1]) - 2)].short_name == "w-Kn":
+                        can_block = True
+                    
+                if char_codes[loc[0].lower()] + 2 <= 8 and int(loc[1]) + 1 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) + 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) + 1)].short_name == "w-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] + 2 <= 8 and int(loc[1]) - 1 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) - 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] + 2] + str(int(loc[1]) - 1)].short_name == "w-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 2 >= 1 + int(loc[1]) + 1 <= 8:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) + 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) + 1)].short_name == "w-Kn":
+                        can_block = True
+                if char_codes[loc[0].lower()] - 2 >= 1 + int(loc[1]) - 1 >= 1:
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) - 1)] == "   0":
+                        continue
+                    if board_dict[chars[char_codes[loc[0].lower()] - 2] + str(int(loc[1]) - 1)].short_name == "w-Kn":
+                        can_block = True
+                        
+                #Check vertical blocks
+                for j in char_indices:
+                    if board_dict[block_range[i][0] + str(j)] == "   0":
+                        continue
+                    if board_dict[block_range[i][0] + str(j)].short_name == "w-Rk" or board_dict[block_range[i][0] + str(j)].short_name == "w-Qu":
+                        can_block = True
+                
+                #Check horizontal blocks
+                for j in chars:
+                    if board_dict[j.upper() + block_range[i][1]] == "   0":
+                        continue
+                    if board_dict[j.upper() + block_range[i][1]].short_name == "w-Rk" or board_dict[j.upper() + block_range[i][1]].short_name == "w-Qu":
+                        can_block = True
+
+                #Check diagonal blocks
+                for j in board_keys:
+                    if abs(char_codes[block_range[i][0]] - block_range[i][1]) == abs(char_codes[j[0]] - j[1]):
+                        if board_dict[j] == "   0":
+                            continue
+                        if board_dict[j].short_name == "w-Bs" or board_dict[j].short_name == "w-Qu":
+                            can_block = True
+
+        
+        return can_block
 
 #Each piece
 class Pawn(Piece):
@@ -734,9 +900,9 @@ class Pawn(Piece):
         if valid == True:
             saved_loc = board_dict[old_location]
             if self.colour[0] == "w":
-                if super().check_move(king_location_b, king_location_b, True) == True:
+                if super().check_move(king_location_b, king_location_b, False) == True:
                     player1.in_check = True
-                    check_pieces_b.append(new_location)
+                    check_piece_b.append(new_location)
                     print(f"{player1.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_w, king_location_w, False) == True:
@@ -745,9 +911,9 @@ class Pawn(Piece):
                     board.update_board(old_location, new_location, False, 2)
                     return valid
             elif self.colour[0] == "b":
-                if super().check_move(king_location_w, king_location_w, True) == True:
+                if super().check_move(king_location_w, king_location_w, False) == True:
                     player2.in_check = True
-                    check_pieces_w.append(new_location)
+                    check_piece_w.append(new_location)
                     print(f"{player2.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_b, king_location_b, False) == True:
@@ -772,6 +938,7 @@ class Pawn(Piece):
             print("Invalid piece name, please try again.")
             self.change_piece(input("Choose what you would like the pawn to change to: "), new_location, old_location)
             
+        
 
 class Rook(Piece):
     def __init__(self, colour, piece_name):
@@ -867,9 +1034,9 @@ class Rook(Piece):
         if valid == True:
             saved_loc = board_dict[old_location]
             if self.colour[0] == "w":
-                if super().check_move(king_location_b, king_location_b, True) == True:
+                if super().check_move(king_location_b, king_location_b, False) == True:
                     player1.in_check = True
-                    check_pieces_b.append(new_location)
+                    check_piece_b.append(new_location)
                     print(f"{player1.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_w, king_location_w, False) == True:
@@ -878,9 +1045,9 @@ class Rook(Piece):
                     board.update_board(old_location, new_location, False, 2)
                     return valid
             elif self.colour[0] == "b":
-                if super().check_move(king_location_w, king_location_w, True) == True:
+                if super().check_move(king_location_w, king_location_w, False) == True:
                     player2.in_check = True
-                    check_pieces_w.append(new_location)
+                    check_piece_w.append(new_location)
                     print(f"{player2.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_b, king_location_b, False) == True:
@@ -1023,9 +1190,9 @@ class Knight(Piece):
         if valid == True:
             saved_loc = board_dict[old_location]
             if self.colour[0] == "w":
-                if super().check_move(king_location_b, king_location_b, True) == True:
+                if super().check_move(king_location_b, king_location_b, False) == True:
                     player1.in_check = True
-                    check_pieces_b.append(new_location)
+                    check_piece_b.append(new_location)
                     print(f"{player1.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_w, king_location_w, False) == True:
@@ -1034,9 +1201,9 @@ class Knight(Piece):
                     board.update_board(old_location, new_location, False, 2)
                     return valid
             elif self.colour[0] == "b":
-                if super().check_move(king_location_w, king_location_w, True) == True:
+                if super().check_move(king_location_w, king_location_w, False) == True:
                     player2.in_check = True
-                    check_pieces_w.append(new_location)
+                    check_piece_w.append(new_location)
                     print(f"{player2.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_b, king_location_b, False) == True:
@@ -1081,7 +1248,6 @@ class Bishop(Piece):
                         iter = char_codes[old_location[0].lower()] - 2
                         #Up left
                         for i in range(old_location_num + 1, new_location_num + 1):
-                            print(chars[iter].upper() + str(i))
                             if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter -= 1
@@ -1099,7 +1265,6 @@ class Bishop(Piece):
                         iter = char_codes[old_location[0].lower()]
                         #Up right
                         for i in range(old_location_num + 1, new_location_num + 1):
-                            print(chars[iter].upper() + str(i))
                             if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter += 1
@@ -1122,7 +1287,6 @@ class Bishop(Piece):
                         iter = char_codes[new_location[0].lower()] - 1
                         #Down left
                         for i in range(new_location_num, old_location_num):
-                            print(chars[iter].upper() + str(i))
                             if board_dict[chars[iter].upper() + str(i)] == "   0" or board_dict[chars[iter].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter += 1
@@ -1140,7 +1304,6 @@ class Bishop(Piece):
                         iter = char_codes[new_location[0].lower()]
                         #Down right
                         for i in range(new_location_num, old_location_num):
-                            print(chars[iter - 1].upper() + str(i))
                             if board_dict[chars[iter - 1].upper() + str(i)] == "   0" or board_dict[chars[iter - 1].upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 iter -= 1
@@ -1164,9 +1327,9 @@ class Bishop(Piece):
         if valid == True:
             saved_loc = board_dict[old_location]
             if self.colour[0] == "w":
-                if super().check_move(king_location_b, king_location_b, True) == True:
+                if super().check_move(king_location_b, king_location_b, False) == True:
                     player1.in_check = True
-                    check_pieces_b.append(new_location)
+                    check_piece_b.append(new_location)
                     print(f"{player1.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_w, king_location_w, False) == True:
@@ -1175,9 +1338,9 @@ class Bishop(Piece):
                     board.update_board(old_location, new_location, False, 2)
                     return valid
             elif self.colour[0] == "b":
-                if super().check_move(king_location_w, king_location_w, True) == True:
+                if super().check_move(king_location_w, king_location_w, False) == True:
                     player2.in_check = True
-                    check_pieces_w.append(new_location)
+                    check_piece_w.append(new_location)
                     print(f"{player2.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_b, king_location_b, False) == True:
@@ -1209,8 +1372,8 @@ class Queen(Piece):
         new_column = new_location[0]
         
         valid = False
-        global check_pieces_b
-        global check_pieces_w
+        global check_piece_b
+        global check_piece_w
         
         #Check if horizontal/vertical or diagonal
         if abs(old_location_num - new_location_num) == abs(char_codes[prev_column.lower()] - char_codes[new_column.lower()]):
@@ -1301,7 +1464,7 @@ class Queen(Piece):
                 else:
                     valid = False
                     return valid
-                
+        
         elif old_location_num == new_location_num or prev_column == new_column:
             #If horizontal/vertical
             if board_dict[new_location] != "   0" and board_dict[old_location].colour[0] == board_dict[new_location].colour[0]:
@@ -1317,7 +1480,7 @@ class Queen(Piece):
                             if board_dict[prev_column.upper() + str(i)] == "   0":
                                 valid = True
                                 continue
-                            elif i == new_location_num and board_dict[prev_column.upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                            elif board_dict[prev_column.upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 continue
                             else:
@@ -1329,7 +1492,7 @@ class Queen(Piece):
                             if board_dict[prev_column.upper() + str(i)] == "   0":
                                 valid = True
                                 continue
-                            elif i == new_location_num and board_dict[prev_column.upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
+                            elif board_dict[prev_column.upper() + str(i)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 continue
                             else:
@@ -1346,7 +1509,7 @@ class Queen(Piece):
                             if board_dict[chars[i - 1].upper() + str(old_location_num)] == "   0":
                                 valid = True
                                 continue
-                            elif i == new_location_num and board_dict[chars[i - 1].upper() + str(old_location_num)].colour[0] != board_dict[old_location].colour[0]:
+                            elif board_dict[chars[i - 1].upper() + str(old_location_num)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 continue
                             else:
@@ -1358,7 +1521,7 @@ class Queen(Piece):
                             if board_dict[chars[i - 1].upper() + str(old_location_num)] == "   0":
                                 valid = True
                                 continue
-                            elif i == new_location_num and board_dict[chars[i - 1].upper() + str(old_location_num)].colour[0] != board_dict[old_location].colour[0]:
+                            elif board_dict[chars[i - 1].upper() + str(old_location_num)].colour[0] != board_dict[old_location].colour[0]:
                                 valid = True
                                 continue
                             else:
@@ -1379,10 +1542,10 @@ class Queen(Piece):
         if valid == True:
             saved_loc = board_dict[old_location]
             if self.colour[0] == "w":
-                if super().check_move(king_location_b, king_location_b, True) == True:
-                    player1.in_check = True
-                    check_pieces_b.append(new_location)
-                    print(f"{player1.name}'s King is in check.")
+                if super().check_move(king_location_b, king_location_b, False) == True:
+                    player2.in_check = True
+                    check_piece_b = new_location.upper()
+                    print(f"{player2.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_w, king_location_w, False) == True:
                     valid = False
@@ -1390,10 +1553,10 @@ class Queen(Piece):
                     board.update_board(old_location, new_location, False, 2)
                     return valid
             elif self.colour[0] == "b":
-                if super().check_move(king_location_w, king_location_w, True) == True:
-                    player2.in_check = True
-                    check_pieces_w.append(new_location)
-                    print(f"{player2.name}'s King is in check.")
+                if super().check_move(king_location_w, king_location_w, False) == True:
+                    player1.in_check = True
+                    check_piece_w = new_location.upper()
+                    print(f"{player1.name}'s King is in check.")
                 board.update_board(old_location, new_location, False, 1)
                 if super().check_move(king_location_b, king_location_b, False) == True:
                     valid = False
@@ -1427,8 +1590,8 @@ class King(Piece):
         
         global king_location_w
         global king_location_b
-        global check_pieces_b
-        global check_pieces_w
+        global check_piece_w
+        global check_piece_b
         
         if new_location_num == old_location_num + 1 or new_location_num == old_location_num - 1 or new_location_num == old_location_num:
             if char_codes[new_column] == char_codes[prev_column] or char_codes[new_column] + 1 == char_codes[prev_column] or char_codes[new_column] - 1 == char_codes[prev_column]:
@@ -1446,33 +1609,29 @@ class King(Piece):
             valid = False
             return valid
         
-        king_move_new = super().check_move(old_location, new_location, True)
-        king_move_old = super().check_move(old_location, old_location, True)
+        if valid == True:
+            if self.colour[0] == "w":
+                if super().check_move(old_location, new_location, True) == True:
+                    player1.in_check = True
+                    print(f"{player1.name}'s King is in check.")
+                    valid = False
+                    return valid
+                elif super().check_move(old_location, new_location, False) == False:
+                    check_piece_w = ""
+                    king_location_w = new_location.upper()
+                    player2.in_check = False
+            elif self.colour[0] == "b":
+                if super().check_move(old_location, new_location, True) == True:
+                    player2.in_check = True
+                    print(f"{player2.name}'s King is in check.")
+                    valid = False
+                    return valid
+                elif super().check_move(old_location, new_location, False) == False:
+                    king_location_b = new_location.upper()
+                    check_piece_b = ""
+                    player2.in_check = False
             
-        if king_move_new == False:
             board.update_board(old_location, new_location, False, 0)
-            if self.colour[0] == "b":
-                check_pieces_b = []
-                king_location_b = new_location.upper()
-            elif self.colour[0] == "w":
-                check_pieces_w = []
-                king_location_w = new_location.upper()
-        elif king_move_new == True and king_move_old == False:
-            if self.colour[0] == "b":
-                player1.in_check = False
-                print(f"{player1.name}'s King is in check.")
-            elif self.colour[0] == "w":
-                player2.in_check = False
-                print(f"{player2.name}'s King is in check.")
-            valid = False
-        elif king_move_new == True and king_move_old == True:
-            if self.colour[0] == "b":
-                player1.in_check = True
-                print(f"{player1.name}'s King is in check.")
-            elif self.colour[0] == "w":
-                player2.in_check = True
-                print(f"{player2.name}'s King is in check.")
-            valid = False
             
         return valid
         
@@ -1537,67 +1696,182 @@ rook_moved_w = [False, False]
 #Main game loop
 def game_loop():
     global current_move
-    global valid_input
+    global check_piece_b
+    global check_piece_w
+    global pieces_left_b
+    global pieces_left_w
+    global can_block_b
+    global can_block_w
+    global can_take_b
+    global can_take_w
+    global block_range
+    global board_keys
+    board_keys = list(board_dict.keys())
     game_state = True
     #Print initial board
     for line in board.grid:
         print(*line)
+    
+    board_dict[king_location_w].check_move(king_location_w, king_location_w, True)
+    board_dict[king_location_b].check_move(king_location_b, king_location_b, True)
         
     #Keep game running, and check if someone has won/lost
     while game_state:
-        valid_input = []
         #Keep track of the current move
         player_names[current_move].__repr__()
         player_names[current_move].choose_move(input(f"{player_names[current_move].name}, choose the current location of your piece: "), input("Now choose a new location for the piece: "))
         king_is_valid_b = {}
         king_is_valid_w = {}
-        
+        #Check for white king in check
+        for i in king_valid_moves_w:
+            if i == king_location_w:
+                king_is_valid_w[i] = True
+                if board_dict[king_location_w].check_move(king_location_w, king_location_w, False) == True:
+                    player1.in_check = True
+                    print(f"{player1.name}'s King is in check.")
+            king_is_valid_w[i] = board_dict[king_location_w].check_move(king_location_w, i, False)
+            if king_is_valid_w[i] == False:
+                if board_dict[i] == "   0":
+                    continue
+                elif board_dict[i].colour[0] == "w":
+                    king_is_valid_w[i] = True
+            
         #Check for black king in check
         for i in king_valid_moves_b:
+            if i == king_location_b:
+                king_is_valid_b[i] = True
+                if board_dict[king_location_b].check_move(king_location_b, king_location_b, False) == True:
+                    player2.in_check = True
+                    print(f"{player2.name}'s King is in check.")
+                continue
+            saved_pos = board_dict[i]
+            board_dict[i] = "   0"
             king_is_valid_b[i] = board_dict[king_location_b].check_move(king_location_b, i, False)
+            board_dict[i] = saved_pos
             if king_is_valid_b[i] == False:
                 if board_dict[i] == "   0":
                     continue
-                elif board_dict[i].colour[0] == "b" and i != king_location_b:
+                elif board_dict[i].colour[0] == "b":
                     king_is_valid_b[i] = True
-            if i == king_location_b and king_is_valid_b[i] == True:
-                player1.in_check = True
-                print(f"{player1.name}'s King is in check.")
-        
-        #Check for white king in check
-        for i in king_valid_moves_w:
-            king_is_valid_w[i] = board_dict[king_location_w].check_move(king_location_w, i, False)
-            if i == king_location_w and king_is_valid_w[i] == True:
-                player2.in_check = True
-                print(f"{player2.name}'s King is in check.")
-            
-        if current_move == 0:
-            #Change turn
-            current_move = 1
-        elif current_move == 1:
-            #Change turn
-            current_move = 0
+                    
+        print([board_dict[i] for i in king_is_valid_b.keys()])
         
         pieces_left_b = [i for i in board_dict if board_dict[i] != "   0" and board_dict[i].colour[0] == "b"]
         pieces_left_w = [i for i in board_dict if board_dict[i] != "   0" and board_dict[i].colour[0] == "w"]
         
-        print(check_pieces_b)
-        #Draw conditions
-        if player1.in_check == True:
-            #Check if king can move
-            if False not in king_is_valid_b.values():
-                #If not, check if the piece putting the king in check can be blocked/taken
-                for i in check_pieces_b:
-                    if board_dict[i].check_move(i, i, False):
+        if current_move == 1:
+            current_move = 0
+            #If king in check, game would end in a win
+            if player1.in_check == True:
+                #Check if king can move
+                if False not in king_is_valid_w.values():
+                    #If not, check if the piece putting the king in check can be blocked/taken
+                    #if board_dict[check_piece_w].check_move(check_piece_w, check_piece_w, False):
                         #Piece can be taken
-                        valid_input.append(i)
-                    else:
+                        #continue
+                    #else:
                         #Check if piece can be blocked
-                        continue
+                    pass
+            #If king not in check, game would end as a draw
+            elif player1.in_check == False:
+                check_piece_w = ""
+                #Check if king can move
+                if False not in king_is_valid_w.values():
+                    #Check if there aren't any other pieces that can move
                     
+                    pass
+                
+            
+        elif current_move == 0:
+            current_move = 1
+            block_range = []
+            can_take_b = True
+            can_block_b = True
+            #If king in check, game would end in a win
+            if player2.in_check == True:
+                #Check if the piece putting the king in check can be blocked/taken
+                if board_dict[check_piece_b].check_move(check_piece_b, check_piece_b, False) == True:
+                    #Piece can be taken
+                    can_take_b = True
+                else:
+                    can_take_b = False
+                    for i in board_keys:
+                        if i == check_piece_b:
+                            block_range_lower = board_keys.index(i)
+                        elif i == king_location_b:
+                            block_range_upper = board_keys.index(i)
+                    print(board_keys)
+                    print(block_range_lower)
+                    print(block_range_upper)
+                    #Check if piece can be blocked
+                    #Check vertical/horizontal moves (queen and rook)
+                    if board_dict[check_piece_b].short_name[2:] == "Rk" or board_dict[check_piece_b].short_name[2:] == "Qu":
+                        #Horizontal rook/queen
+                        if check_piece_b[1] == king_location_b[1]:
+                            if char_codes[check_piece_b[0].lower()] > char_codes[king_location_b[0].lower()] == True:
+                                block_range_lower, block_range_upper = block_range_upper, block_range_lower
+                                
+                            for i in range(block_range_lower + 1, block_range_upper):
+                                block_range.append(board_keys[i])
+                                
+                            if board_dict[check_piece_b].can_block(block_range, check_piece_b) == True:
+                                can_block_b = True
+                            else:
+                                can_block_b = False
+                        #Vertical rook/queen
+                        elif check_piece_b[0] == king_location_b[0]:
+                            if check_piece_b[1] < king_location_b[1]:
+                                block_range_lower, block_range_upper = block_range_upper, block_range_lower
+                                
+                            for i in range(block_range_lower, block_range_upper, 8):
+                                if board_keys[i] == block_range_lower or board_keys[i] == block_range_upper:
+                                    continue
+                                block_range.append(board_keys[i])
+                            
+                            if board_dict[check_piece_b].can_block(block_range, check_piece_b) == True:
+                                can_block_b = True
+                            else:
+                                can_block_b = False
+                                
+                    #Check diagonal moves (queen and bishop)
+                    elif board_dict[check_piece_b].short_name[2:] == "Qu" or board_dict[check_piece_b].short_name[2:] == "Bs":
+                        if abs(char_codes[check_piece_b[0].lower()] - int(check_piece_b[1])) == abs(char_codes[king_location_b[0].lower()] - int(king_location_b[1])):
+                            if check_piece_b[1] < king_location_b[1]:
+                                block_range_lower, block_range_upper = block_range_upper, block_range_lower
+                            
+                            if char_codes[board_keys[block_range_lower][0].lower()] > char_codes[board_keys[block_range_upper][0].lower()]:
+                                for i in range(block_range_lower, block_range_upper, 7):
+                                    if board_keys[i] == block_range_lower or board_keys[i] == block_range_upper:
+                                        continue
+                                    block_range.append(board_keys[i])
+                            elif char_codes[board_keys[block_range_lower][0].lower()] < char_codes[board_keys[block_range_upper][0].lower()]:
+                                for i in range(block_range_lower, block_range_upper, 9):
+                                    if board_keys[i] == block_range_lower or board_keys[i] == block_range_upper:
+                                        continue
+                                    block_range.append(board_keys[i])
+                            
+                            if board_dict[check_piece_b].can_block(block_range, check_piece_b) == True:
+                                can_block_b = True
+                            else:
+                                can_block_b = False
+                                
+
+                    #Game ends if check piece cannot be blocked or taken and king is in check and cannot move
+                    print(king_is_valid_b.values())
+                    if False not in king_is_valid_b.values() and can_block_b == False:
+                        player2.game_over = True
+                                
+            #If king not in check and cannot move, game would end as a draw
+            elif player2.in_check == False:
+                check_piece_b = ""
+                #Check if king can move
+                if False not in king_is_valid_b.values():
+                    #Check that there aren't any other pieces that can move
+                    
+                    pass
                     
             
-            
+        
         #Check if someone has won/lost
         if player1.game_over == True:
             game_state = False
@@ -1612,27 +1886,29 @@ def game_loop():
 board = Board()
 #Current move 
 current_move = 0
-player1 = Player("black", input("Player 1 (Black), choose your name: "), 0)
-player2 = Player("white", input("Player 2 (White), choose your name: "), 1)
+player1 = Player("white", input("Player 1 (White), choose your name: "), 0)
+player2 = Player("black", input("Player 2 (Black), choose your name: "), 1)
 player_names = [player1, player2]
 board_dict = {}
 past_moves = []
-check_pieces_b = []
-check_pieces_w = []
-valid_input = []
+check_piece_b = ""
+check_piece_w = ""
 taken_piece = ""
+can_block_b = False
+can_block_w = False
+can_take_b = False
+can_take_w = False
+block_range = []
+board_keys = []
 
 board.create_board()
 
 game_loop()
 
-#Valid moves changing after not moving king?
 #Draw determination, if all items in valid mvoes are true then check if king is in check, if yes check if pieces putting king in check can be taken
 
-#Check if piece putting king in check can be taken
-#Or check if locations in between king and check piece can have a piece move into for a blockage
-#Check if king can move
-#Lock move to one of these moves if king in check
+#Check blockages
+#Check if no piece can move
 
 #Castling
 #Pawn edge of board
